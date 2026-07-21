@@ -368,10 +368,10 @@ ui <- page_sidebar(
       full_screen = FALSE,
       card_header("How to count relatives"),
       div(
-        style = "padding: 10px; height: 280px; overflow: hidden; display: flex; align-items: center; justify-content: center;",
+        style = "padding: 10px; height: 280px; overflow: hidden;",
         tags$img(
           src = "APECS_relative_count.svg",
-          style = "max-width: 100%; max-height: 100%; width: auto; height: auto; display: block;"
+          style = "width: 100%; height: 100%; object-fit: contain; display: block;"
         )
       )
     ),
