@@ -403,21 +403,40 @@ server <- function(input, output, session) {
       ci_high_label = c("—", format_prob(row$PPV_CI_high))
     )
 
-    plot_df$monogenic_hover <- paste0(
-      "<b>", plot_df$scenario, "</b><br>",
-      "Monogenic: ", plot_df$monogenic_label, "<br>",
-      "95% CI: ", plot_df$ci_low_label, " – ", plot_df$ci_high_label, "<br>",
-      "n = ", format_count(plot_df$monogenic_n), " of ", format_count(plot_df$total_n),
-      "<extra></extra>"
+    plot_df$monogenic_hover <- ifelse(
+      plot_df$scenario == "Family history",
+      paste0(
+        "<b>", plot_df$scenario, "</b><br>",
+        "Monogenic: ", plot_df$monogenic_label, "<br>",
+        "95% CI: ", plot_df$ci_low_label, " – ", plot_df$ci_high_label, "<br>",
+        "n = ", format_count(plot_df$monogenic_n), " of ", format_count(plot_df$total_n),
+        "<extra></extra>"
+      ),
+      paste0(
+        "<b>", plot_df$scenario, "</b><br>",
+        "Monogenic: ", plot_df$monogenic_label, "<br>",
+        "n = ", format_count(plot_df$monogenic_n), " of ", format_count(plot_df$total_n),
+        "<extra></extra>"
+      )
     )
 
-    plot_df$polygenic_hover <- paste0(
-      "<b>", plot_df$scenario, "</b><br>",
-      "Polygenic: ", plot_df$polygenic_label, "<br>",
-      "95% CI: ", plot_df$ci_low_label, " – ", plot_df$ci_high_label, "<br>",
-      "n = ", format_count(plot_df$polygenic_n), " of ", format_count(plot_df$total_n),
-      "<extra></extra>"
+    plot_df$polygenic_hover <- ifelse(
+      plot_df$scenario == "Family history",
+      paste0(
+        "<b>", plot_df$scenario, "</b><br>",
+        "Polygenic: ", plot_df$polygenic_label, "<br>",
+        "95% CI: ", plot_df$ci_low_label, " – ", plot_df$ci_high_label, "<br>",
+        "n = ", format_count(plot_df$polygenic_n), " of ", format_count(plot_df$total_n),
+        "<extra></extra>"
+      ),
+      paste0(
+        "<b>", plot_df$scenario, "</b><br>",
+        "Polygenic: ", plot_df$polygenic_label, "<br>",
+        "n = ", format_count(plot_df$polygenic_n), " of ", format_count(plot_df$total_n),
+        "<extra></extra>"
+      )
     )
+
 
     darjeeling_cols <- grDevices::adjustcolor(
       wes_palette("Darjeeling1", 5, type = "discrete"),
@@ -497,57 +516,52 @@ server <- function(input, output, session) {
       )
   })
 
-  output$match_tbl <- renderUI({
-    row <- selected_row()
+output$match_tbl <- renderUI({
+  row <- selected_row()
 
-    if (input$mode == "ALS only") {
-      tags$table(
-        class = "table table-striped table-bordered table-sm",
-        tags$thead(
-          tags$tr(
-            tags$th("ALS family history"),
-            tags$th("Number of affected index patients"),
-            tags$th("Number of monogenic index patients"),
-            tags$th("Number of polygenic index patients"),
-            tags$th("Prevalence of this specific family history")
-          )
-        ),
-        tags$tbody(
-          tags$tr(
-            tags$td(HTML(format_als_history(row))),
-            tags$td(format_count(row$n)),
-            tags$td(format_count(row$n_mendelian)),
-            tags$td(format_count(row$n_non_mendelian)),
-            tags$td(format_prevalence(row$prevalence))
-          )
+  if (input$mode == "ALS only") {
+    tags$table(
+      class = "table table-striped table-bordered table-sm",
+      tags$thead(
+        tags$tr(
+          tags$th("ALS family history"),
+          tags$th("Number of monogenic index patients"),
+          tags$th("Number of polygenic index patients"),
+          tags$th("Prevalence of this specific family history")
+        )
+      ),
+      tags$tbody(
+        tags$tr(
+          tags$td(HTML(format_als_history(row))),
+          tags$td(format_count(row$n_mendelian)),
+          tags$td(format_count(row$n_non_mendelian)),
+          tags$td(format_prevalence(row$prevalence))
         )
       )
-    } else {
-      tags$table(
-        class = "table table-striped table-bordered table-sm",
-        tags$thead(
-          tags$tr(
-            tags$th("ALS family history"),
-            tags$th("FTD family history"),
-            tags$th("Number of affected index patients"),
-            tags$th("Number of monogenic index patients"),
-            tags$th("Number of polygenic index patients"),
-            tags$th("Prevalence of this specific family history")
-          )
-        ),
-        tags$tbody(
-          tags$tr(
-            tags$td(HTML(format_als_history(row))),
-            tags$td(HTML(format_ftd_history(row))),
-            tags$td(format_count(row$n)),
-            tags$td(format_count(row$n_mendelian)),
-            tags$td(format_count(row$n_non_mendelian)),
-            tags$td(format_prevalence(row$prevalence))
-          )
+    )
+  } else {
+    tags$table(
+      class = "table table-striped table-bordered table-sm",
+      tags$thead(
+        tags$tr(
+          tags$th("ALS family history"),
+          tags$th("FTD family history"),
+          tags$th("Number of monogenic index patients"),
+          tags$th("Number of polygenic index patients"),
+          tags$th("Family history prevalence")
+        )
+      ),
+      tags$tbody(
+        tags$tr(
+          tags$td(HTML(format_als_history(row))),
+          tags$td(HTML(format_ftd_history(row))),
+          tags$td(format_count(row$n_mendelian)),
+          tags$td(format_count(row$n_non_mendelian)),
+          tags$td(format_prevalence(row$prevalence))
         )
       )
-    }
-  })
-}
+    )
+  }
+})
 
 shinyApp(ui = ui, server = server)
