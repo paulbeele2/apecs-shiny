@@ -270,7 +270,7 @@ ui <- page_sidebar(
         ),
         p(
           "APECS was benchmarked in 3-generation pedigrees, limiting ",
-          "predictions involving more distant affected relatives"
+          "predictions involving more distant affected relatives."
         )
       )
     )
