@@ -374,6 +374,7 @@ ui <- page_sidebar(
           style = "max-width: 100%; max-height: 100%; width: auto; height: auto; display: block;"
         )
       )
+    ),
 
     card(
       full_screen = FALSE,
