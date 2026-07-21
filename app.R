@@ -8,7 +8,7 @@ library(wesanderson)
 required_files <- c(
   "output_ppv_als_grid.csv",
   "output_ppv_alsftd_grid.csv",
-  "www/APECS.png",
+  "www/APECS_logo.png",
   "www/APECS_relative_count.svg"
 )
 
@@ -104,7 +104,7 @@ ui <- page_sidebar(
   title = div(
     style = "display: flex; align-items: center; justify-content: flex-start; width: 100%; gap: 20px;",
     tags$img(
-      src = "APECS.png",
+      src = "APECS_logo.png",
       height = "100px",
       style = "object-fit: contain;"
     ),
@@ -238,10 +238,10 @@ ui <- page_sidebar(
       full_screen = FALSE,
       card_header("How to count relatives"),
       div(
-        style = "padding: 10px;",
+        style = "padding: 10px; height: 100%; overflow: hidden;",
         tags$img(
           src = "APECS_relative_count.svg",
-          style = "width: 100%; height: auto; display: block;"
+          style = "width: 100%; height: 100%; object-fit: contain; display: block;"
         )
       )
     ),
