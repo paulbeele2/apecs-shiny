@@ -8,7 +8,8 @@ library(wesanderson)
 required_files <- c(
   "output_ppv_als_grid.csv",
   "output_ppv_alsftd_grid.csv",
-  "www/APECS.png"
+  "www/APECS.png",
+  "www/APECS_relative_count.svg"
 )
 
 missing_files <- required_files[!file.exists(required_files)]
@@ -123,6 +124,7 @@ ui <- page_sidebar(
   ),
   theme = bs_theme(version = 5),
   sidebar = sidebar(
+    width = 320,
     selectInput("mode", "Model", choices = c("ALS only", "ALS + FTD")),
 
     selectInput(
@@ -166,14 +168,61 @@ ui <- page_sidebar(
       )
     )
   ),
-  card(
-    card_header("Estimated Probability of Monogenic Disease (PPV)"),
-    verbatimTextOutput("ppv_text")
+
+  layout_columns(
+    col_widths = c(7, 5),
+
+    card(
+      full_screen = FALSE,
+      card_header("How to count relatives"),
+      div(
+        style = "padding: 10px;",
+        tags$img(
+          src = "APECS_relative_count.svg",
+          style = "width: 100%; height: auto; display: block;"
+        )
+      )
+    ),
+
+    card(
+      full_screen = FALSE,
+      card_header("Counting affected relatives"),
+      div(
+        style = "padding: 15px; font-size: 16px; line-height: 1.6;",
+        p(
+          "Index patient (individual A) is marked by the black arrow. ",
+          "The degree of relatives to individual A is illustrated by the number in each individual."
+        ),
+        p(
+          "Note that for ‘any dementia’-affected relative, both FTD- (individual D) ",
+          "and other dementia-affected (individual C) relatives are considered."
+        ),
+        p(
+          "Comorbid ALS-FTD (individual B) is only counted as ALS once."
+        )
+      )
+    )
   ),
-  card(
-    card_header("Prior Probability vs Family History Probability"),
-    plotlyOutput("prob_bar", height = "260px")
+
+  layout_columns(
+    col_widths = c(7, 5),
+
+    card(
+      full_screen = FALSE,
+      card_header("Prior Probability vs Family History Probability"),
+      plotlyOutput("prob_bar", height = "300px")
+    ),
+
+    card(
+      full_screen = FALSE,
+      card_header("Estimated Probability of Monogenic Disease (PPV)"),
+      div(
+        style = "padding: 15px; font-size: 18px; line-height: 1.7;",
+        verbatimTextOutput("ppv_text")
+      )
+    )
   ),
+
   card(
     card_header("Simulated Pedigrees Matching Input Family History"),
     uiOutput("match_tbl")
