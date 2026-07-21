@@ -232,7 +232,7 @@ ui <- page_sidebar(
   ),
 
   layout_columns(
-    col_widths = c(7, 5),
+    col_widths = c(8, 4),
 
     card(
       full_screen = FALSE,
@@ -267,7 +267,7 @@ ui <- page_sidebar(
   ),
 
   layout_columns(
-    col_widths = c(7, 5),
+    col_widths = c(8, 4),
 
     card(
       full_screen = FALSE,
@@ -367,7 +367,8 @@ server <- function(input, output, session) {
           format_prob(row$PPV_CI_low),
           "</strong> – <strong>",
           format_prob(row$PPV_CI_high),
-          "</strong>), based on ",
+          "</strong>)<br>",
+          "Based on ",
           format_count(row$n),
           " matching simulated pedigrees."
         ))
