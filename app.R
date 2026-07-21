@@ -106,6 +106,7 @@ ui <- page_sidebar(
     tags$img(
       src = "APECS_logo.png",
       height = "100px",
+      class = "d-none d-md-block",  # hide on < md, show from md+
       style = "object-fit: contain;"
     ),
     div(
