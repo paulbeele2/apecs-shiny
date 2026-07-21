@@ -204,26 +204,23 @@ ui <- page_sidebar(
       }
 
       .svg-card .card-body {
-        overflow: hidden;
         padding: 10px;
       }
 
       .svg-fit-box {
-        height: 280px;
         width: 100%;
-        overflow: hidden;
+        aspect-ratio: 16 / 10;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
       }
 
       .svg-fit-img {
-        display: block;
-        max-width: 90%;
-        max-height: 90%;
-        width: auto;
-        height: auto;
+        width: 100%;
+        height: 100%;
         object-fit: contain;
+        display: block;
       }
 
       .ppv-box {
