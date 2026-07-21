@@ -203,24 +203,6 @@ ui <- page_sidebar(
         margin-bottom: 0;
       }
 
-      .svg-wrap {
-        padding: 10px;
-        min-height: 260px;
-        max-height: 360px;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .svg-card-img {
-        width: 100%;
-        height: 100%;
-        max-height: 340px;
-        object-fit: contain;
-        display: block;
-      }
-
       .ppv-box {
         padding: 15px;
       }
