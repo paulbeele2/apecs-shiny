@@ -167,7 +167,7 @@ ui <- page_sidebar(
       .shiny-input-container label,
       .form-control,
       .form-select {
-        font-size: 12px !important;
+        font-size: 13px !important;
         line-height: 1.5;
       }
 
@@ -271,7 +271,7 @@ ui <- page_sidebar(
 
     card(
       full_screen = FALSE,
-      card_header("Prior Probability vs Family History Probability"),
+      card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
       plotlyOutput("prob_bar", height = "300px")
     ),
 
@@ -283,7 +283,7 @@ ui <- page_sidebar(
   ),
 
   card(
-    card_header("Simulated Pedigrees Matching Input Family History"),
+    card_header("Simulated Pedigrees matching Family History"),
     uiOutput("match_tbl")
   )
 )
@@ -384,12 +384,22 @@ server <- function(input, output, session) {
     post_polygenic <- row$n_non_mendelian / row$n
 
     plot_df <- data.frame(
-      scenario = c("Prior probability", "Posterior probability"),
+      scenario = factor(c("Prior", "Family history"), levels = c("Family history", "Prior")),
       monogenic = c(prior_monogenic, post_monogenic),
       polygenic = c(prior_polygenic, post_polygenic),
       monogenic_n = c(prior_mendelian_n, row$n_mendelian),
       polygenic_n = c(prior_total_n - prior_mendelian_n, row$n_non_mendelian),
-      total_n = c(prior_total_n, row$n)
+      total_n = c(prior_total_n, row$n),
+      monogenic_label = c(
+        format_prob(prior_monogenic),
+        format_prob(post_monogenic)
+      ),
+      polygenic_label = c(
+        format_prob(prior_polygenic),
+        format_prob(post_polygenic)
+      ),
+      ci_low = c(NA, row$PPV_CI_low),
+      ci_high = c(NA, row$PPV_CI_high)
     )
 
     darjeeling_cols <- grDevices::adjustcolor(
@@ -404,16 +414,29 @@ server <- function(input, output, session) {
         name = "Monogenic",
         type = "bar",
         orientation = "h",
-        marker = list(color = darjeeling_cols[1]),
-        text = ~paste0(format_prob(monogenic), "<br>(n = ", format_count(monogenic_n), ")"),
+        marker = list(
+          color = darjeeling_cols[1],
+          line = list(color = "white", width = 1)
+        ),
+        text = ~monogenic_label,
         textposition = "inside",
         insidetextanchor = "middle",
-        hovertemplate = paste(
-          "<b>%{y}</b><br>",
-          "Monogenic: %{text}<br>",
-          "Total: %{customdata}<extra></extra>"
+        textfont = list(size = 11, color = "white"),
+        hovertemplate = ~ifelse(
+          scenario == "Family history",
+          paste0(
+            "<b>%{y}</b><br>",
+            "Monogenic: %{x:.1%}<br>",
+            "95% CI: ", format_prob(ci_low), " – ", format_prob(ci_high), "<br>",
+            "n = %{customdata[0]} of %{customdata[1]}<extra></extra>"
+          ),
+          paste0(
+            "<b>%{y}</b><br>",
+            "Monogenic: %{x:.1%}<br>",
+            "n = %{customdata[0]} of %{customdata[1]}<extra></extra>"
+          )
         ),
-        customdata = ~format_count(total_n)
+        customdata = ~Map(c, format_count(monogenic_n), format_count(total_n))
       ) %>%
       add_trace(
         x = ~polygenic,
@@ -421,38 +444,57 @@ server <- function(input, output, session) {
         name = "Polygenic",
         type = "bar",
         orientation = "h",
-        marker = list(color = darjeeling_cols[2]),
-        text = ~paste0(format_prob(polygenic), "<br>(n = ", format_count(polygenic_n), ")"),
+        marker = list(
+          color = darjeeling_cols[2],
+          line = list(color = "white", width = 1)
+        ),
+        text = ~polygenic_label,
         textposition = "inside",
         insidetextanchor = "middle",
+        textfont = list(size = 11, color = "white"),
         hovertemplate = paste(
           "<b>%{y}</b><br>",
-          "Polygenic: %{text}<br>",
-          "Total: %{customdata}<extra></extra>"
+          "Polygenic: %{x:.1%}<br>",
+          "n = %{customdata[0]} of %{customdata[1]}<extra></extra>"
         ),
-        customdata = ~format_count(total_n)
+        customdata = ~Map(c, format_count(polygenic_n), format_count(total_n))
       ) %>%
       layout(
         barmode = "stack",
-        font = list(size = 12),
+        bargap = 0.35,
+        font = list(size = 13),
+        uniformtext = list(minsize = 9, mode = "show"),
         xaxis = list(
-          title = "Proportion",
+          title = "",
           tickformat = ".0%",
-          range = c(0, 1)
+          range = c(0, 1),
+          showgrid = TRUE,
+          gridcolor = "#e9ecef",
+          zeroline = FALSE,
+          fixedrange = TRUE
         ),
         yaxis = list(
           title = "",
-          automargin = TRUE
+          automargin = TRUE,
+          fixedrange = TRUE
         ),
         legend = list(
           orientation = "h",
           xanchor = "center",
           x = 0.5,
           yanchor = "bottom",
-          y = 1.10,
+          y = 1.02,
           font = list(size = 12)
         ),
-        margin = list(l = 180, r = 30, t = 20, b = 50)
+        margin = list(l = 95, r = 10, t = 10, b = 30),
+        dragmode = FALSE
+      ) %>%
+      config(
+        displayModeBar = FALSE,
+        staticPlot = FALSE,
+        scrollZoom = FALSE,
+        doubleClick = FALSE,
+        showTips = FALSE
       )
   })
 
