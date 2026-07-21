@@ -40,7 +40,8 @@ The app allows users to specify the number of affected relatives by degree of re
 - `output_ppv_als_grid.csv` – lookup table for the ALS-only model.
 - `output_ppv_alsftd_grid.csv` – lookup table for the ALS + FTD model.
 - `src/PPV_grid.R` – supporting code used to generate or process lookup grid content.
-- `www/APECS.png` – application logo served as a static web asset.
+- `www/APECS_logo.png` – application logo served as a static web asset.
+- `www/APECS_relative_count.svg` – visualization of how to count relatives.
 
 ## Running locally
 
@@ -77,7 +78,6 @@ The application depends on the following R packages:
 - dplyr
 - bslib
 - plotly
-- wesanderson
 - rsconnect (for deployment only)
 
 ## Purpose

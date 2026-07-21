@@ -3,7 +3,6 @@ library(readr)
 library(dplyr)
 library(bslib)
 library(plotly)
-library(wesanderson)
 
 required_files <- c(
   "output_ppv_als_grid.csv",
@@ -444,12 +443,6 @@ server <- function(input, output, session) {
       )
     )
 
-
-    darjeeling_cols <- grDevices::adjustcolor(
-      wes_palette("Darjeeling1", 5, type = "discrete"),
-      alpha.f = 0.9
-    )
-
     plot_ly(plot_df) %>%
       add_trace(
         x = ~monogenic,
@@ -458,7 +451,7 @@ server <- function(input, output, session) {
         type = "bar",
         orientation = "h",
         marker = list(
-          color = darjeeling_cols[1],
+          color = "#ed2024",          # monogenic red
           line = list(color = "white", width = 1)
         ),
         text = ~monogenic_label,
@@ -474,7 +467,7 @@ server <- function(input, output, session) {
         type = "bar",
         orientation = "h",
         marker = list(
-          color = darjeeling_cols[2],
+          color = "#1c75bc",          # polygenic blue
           line = list(color = "white", width = 1)
         ),
         text = ~polygenic_label,
@@ -511,7 +504,7 @@ server <- function(input, output, session) {
           y = 1.01,
           font = list(size = 12)
         ),
-        margin = list(l = 85, r = 8, t = 6, b = 24),
+        margin = list(l = 25, r = 8, t = 6, b = 8),
         dragmode = FALSE
       ) %>%
       config(
