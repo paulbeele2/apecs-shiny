@@ -451,7 +451,7 @@ server <- function(input, output, session) {
         type = "bar",
         orientation = "h",
         marker = list(
-          color = "#ed2024",          # monogenic red
+          color = "#c1181b",          # monogenic red
           line = list(color = "white", width = 1)
         ),
         text = ~monogenic_label,
@@ -467,7 +467,7 @@ server <- function(input, output, session) {
         type = "bar",
         orientation = "h",
         marker = list(
-          color = "#1c75bc",          # polygenic blue
+          color = "#5cbcd6",          # polygenic blue
           line = list(color = "white", width = 1)
         ),
         text = ~polygenic_label,
