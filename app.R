@@ -277,7 +277,7 @@ ui <- page_sidebar(
 
     card(
       full_screen = FALSE,
-      card_header("Estimated Probability of Monogenic Disease (PPV)"),
+      card_header("Estimated Probability of Monogenic Disease"),
       uiOutput("ppv_box")
     )
   ),
@@ -367,7 +367,7 @@ server <- function(input, output, session) {
           format_prob(row$PPV_CI_low),
           "</strong> – <strong>",
           format_prob(row$PPV_CI_high),
-          "</strong>)<br>",
+          "</strong>);<br><br>",
           "Based on ",
           format_count(row$n),
           " matching simulated pedigrees."
