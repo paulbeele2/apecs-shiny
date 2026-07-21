@@ -102,13 +102,13 @@ wilson_ci <- function(x, n, conf_level = 0.95) {
 
 ui <- page_sidebar(
   title = div(
-    class = "title-wrap",
+    style = "display: flex; align-items: center; justify-content: flex-start; width: 100%; gap: 20px;",
     tags$img(
       src = "APECS_logo.png",
-      class = "apecs-logo"
+      height = "100px",
+      style = "object-fit: contain;"
     ),
     div(
-      class = "title-text",
       div(
         class = "app-title",
         HTML(
@@ -125,27 +125,7 @@ ui <- page_sidebar(
   theme = bs_theme(version = 5),
 
   tags$head(
-    tags$meta(name = "viewport", content = "width=device-width, initial-scale=1"),
     tags$style(HTML("
-      .title-wrap {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        width: 100%;
-        gap: 20px;
-      }
-
-      .title-text {
-        min-width: 0;
-      }
-
-      .apecs-logo {
-        height: 100px;
-        width: auto;
-        object-fit: contain;
-        flex-shrink: 0;
-      }
-
       .app-title {
         font-size: 22px;
         font-weight: 600;
@@ -202,119 +182,11 @@ ui <- page_sidebar(
       .card-body p:last-child {
         margin-bottom: 0;
       }
-
-      .svg-card .card-body {
-        padding: 10px;
-      }
-
-      .svg-fit-box {
-        width: 100%;
-        aspect-ratio: 3 / 4;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-      }
-
-      .svg-fit-img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        display: block;
-      }
-
-      .ppv-box {
-        padding: 15px;
-      }
-
-      .table-wrap {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .table {
-        margin-bottom: 0;
-      }
-
-      .table th,
-      .table td {
-        vertical-align: middle;
-      }
-
-      .table th:nth-child(n+2),
-      .table td:nth-child(n+2) {
-        text-align: center;
-        white-space: nowrap;
-      }
-
-      @media (max-width: 768px) {
-        .title-wrap {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 12px;
-        }
-
-        .apecs-logo {
-          height: 64px;
-        }
-
-        .app-title {
-          font-size: 18px;
-        }
-
-        .app-subtitle {
-          font-size: 14px;
-        }
-
-        .app-fullname {
-          font-size: 12px;
-        }
-
-        .card-header {
-          font-size: 14px !important;
-        }
-
-        .card-body,
-        .card-body p,
-        .card-body div,
-        .card-body span,
-        .sidebar,
-        .sidebar .form-label,
-        .sidebar .selectize-input,
-        .sidebar .selectize-dropdown,
-        .sidebar .form-select,
-        .sidebar .control-label,
-        .sidebar label,
-        .table,
-        .table th,
-        .table td,
-        .shiny-input-container,
-        .shiny-input-container label,
-        .form-control,
-        .form-select {
-          font-size: 12px !important;
-          line-height: 1.4;
-        }
-
-        .svg-fit-box {
-          height: 220px;
-        }
-
-        .svg-fit-img {
-          max-width: 88%;
-          max-height: 88%;
-        }
-
-        .ppv-box {
-          padding: 12px;
-        }
-      }
     "))
   ),
 
   sidebar = sidebar(
-    width = 260,
-    open = "desktop",
+    width = 320,
     selectInput("mode", "Model", choices = c("ALS only", "ALS + FTD")),
 
     selectInput(
@@ -360,20 +232,16 @@ ui <- page_sidebar(
   ),
 
   layout_columns(
-    col_widths = breakpoints(
-      sm = c(12, 12),
-      lg = c(8, 4)
-    ),
+    col_widths = c(8, 4),
 
     card(
-      class = "svg-card",
       full_screen = FALSE,
       card_header("How to count relatives"),
       div(
-        class = "svg-fit-box",
+        style = "padding: 10px; height: 100%; overflow: hidden;",
         tags$img(
           src = "APECS_relative_count.svg",
-          class = "svg-fit-img"
+          style = "width: 100%; height: 100%; object-fit: contain; display: block;"
         )
       )
     ),
@@ -399,15 +267,12 @@ ui <- page_sidebar(
   ),
 
   layout_columns(
-    col_widths = breakpoints(
-      sm = c(12, 12),
-      lg = c(8, 4)
-    ),
+    col_widths = c(8, 4),
 
     card(
       full_screen = FALSE,
       card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
-      plotlyOutput("prob_bar", width = "100%", height = "260px")
+      plotlyOutput("prob_bar", height = "300px")
     ),
 
     card(
@@ -424,7 +289,6 @@ ui <- page_sidebar(
 )
 
 server <- function(input, output, session) {
-
   selected_row <- reactive({
     df <- if (input$mode == "ALS only") als_grid else alsftd_grid
 
@@ -494,7 +358,7 @@ server <- function(input, output, session) {
     row <- selected_row()
 
     div(
-      class = "ppv-box",
+      style = "padding: 15px;",
       p(
         HTML(paste0(
           "Probability of monogenic disease: <strong>",
@@ -503,7 +367,7 @@ server <- function(input, output, session) {
           format_prob(row$PPV_CI_low),
           "</strong> – <strong>",
           format_prob(row$PPV_CI_high),
-          "</strong>)<br><br>",
+          "</strong>);<br><br>",
           "Based on ",
           format_count(row$n),
           " matching simulated pedigrees."
@@ -572,6 +436,7 @@ server <- function(input, output, session) {
         "<extra></extra>"
       )
     )
+
 
     darjeeling_cols <- grDevices::adjustcolor(
       wes_palette("Darjeeling1", 5, type = "discrete"),
@@ -655,56 +520,49 @@ server <- function(input, output, session) {
     row <- selected_row()
 
     if (input$mode == "ALS only") {
-      div(
-        class = "table-wrap",
-        tags$table(
-          class = "table table-striped table-bordered table-sm",
-          tags$thead(
-            tags$tr(
-              tags$th("ALS family history"),
-              tags$th("Number of monogenic index patients"),
-              tags$th("Number of polygenic index patients"),
-              tags$th("Prevalence of this specific family history")
-            )
-          ),
-          tags$tbody(
-            tags$tr(
-              tags$td(HTML(format_als_history(row))),
-              tags$td(format_count(row$n_mendelian)),
-              tags$td(format_count(row$n_non_mendelian)),
-              tags$td(format_prevalence(row$prevalence))
-            )
+      tags$table(
+        class = "table table-striped table-bordered table-sm",
+        tags$thead(
+          tags$tr(
+            tags$th("ALS family history"),
+            tags$th("Number of monogenic index patients"),
+            tags$th("Number of polygenic index patients"),
+            tags$th("Prevalence of this specific family history")
+          )
+        ),
+        tags$tbody(
+          tags$tr(
+            tags$td(HTML(format_als_history(row))),
+            tags$td(format_count(row$n_mendelian)),
+            tags$td(format_count(row$n_non_mendelian)),
+            tags$td(format_prevalence(row$prevalence))
           )
         )
       )
     } else {
-      div(
-        class = "table-wrap",
-        tags$table(
-          class = "table table-striped table-bordered table-sm",
-          tags$thead(
-            tags$tr(
-              tags$th("ALS family history"),
-              tags$th("FTD family history"),
-              tags$th("Number of monogenic index patients"),
-              tags$th("Number of polygenic index patients"),
-              tags$th("Family history prevalence")
-            )
-          ),
-          tags$tbody(
-            tags$tr(
-              tags$td(HTML(format_als_history(row))),
-              tags$td(HTML(format_ftd_history(row))),
-              tags$td(format_count(row$n_mendelian)),
-              tags$td(format_count(row$n_non_mendelian)),
-              tags$td(format_prevalence(row$prevalence))
-            )
+      tags$table(
+        class = "table table-striped table-bordered table-sm",
+        tags$thead(
+          tags$tr(
+            tags$th("ALS family history"),
+            tags$th("FTD family history"),
+            tags$th("Number of monogenic index patients"),
+            tags$th("Number of polygenic index patients"),
+            tags$th("Family history prevalence")
+          )
+        ),
+        tags$tbody(
+          tags$tr(
+            tags$td(HTML(format_als_history(row))),
+            tags$td(HTML(format_ftd_history(row))),
+            tags$td(format_count(row$n_mendelian)),
+            tags$td(format_count(row$n_non_mendelian)),
+            tags$td(format_prevalence(row$prevalence))
           )
         )
       )
     }
   })
 }
-
 
 shinyApp(ui = ui, server = server)
