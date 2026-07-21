@@ -262,11 +262,15 @@ ui <- page_sidebar(
           "The degree of relatives to individual A is illustrated by the number in each individual."
         ),
         p(
+          "Comorbid ALS-FTD (individual B) is only counted as ALS once."
+        ),
+        p(
           "Note that for ‘any dementia’-affected relative, both FTD- (individual D) ",
           "and other dementia-affected (individual C) relatives are considered."
         ),
         p(
-          "Comorbid ALS-FTD (individual B) is only counted as ALS once."
+          "APECS was benchmarked in 3-generation pedigrees, limiting ",
+          "predictions involving more distant affected relatives"
         )
       )
     )
