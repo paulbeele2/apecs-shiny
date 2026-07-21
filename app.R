@@ -101,7 +101,7 @@ wilson_ci <- function(x, n, conf_level = 0.95) {
 
 ui <- page_sidebar(
   title = div(
-    style = "display: flex; align-items: center; justify-content: flex-start; width: 100%; gap: 20px;",
+    style = "display: flex; align-items: center; justify-content: flex-start; width: 100%; gap: 10px;",
     tags$img(
       src = "APECS_logo.png",
       height = "100px",
@@ -244,7 +244,7 @@ ui <- page_sidebar(
       full_screen = FALSE,
       card_header("How to count relatives"),
       div(
-        style = "padding: 10px; height: 100%; overflow: hidden;",
+        style = "padding: 4px; height: 100%; overflow: hidden;",
         tags$img(
           src = "APECS_relative_count.svg",
           style = "width: 100%; height: 100%; object-fit: contain; display: block;"
@@ -256,7 +256,7 @@ ui <- page_sidebar(
       full_screen = FALSE,
       card_header("Counting affected relatives"),
       div(
-        style = "padding: 15px;",
+        style = "padding: 5px;",
         p(
           "Index patient (individual A) is marked by the black arrow. ",
           "The degree of relatives to individual A is illustrated by the number in each individual."
@@ -278,7 +278,7 @@ ui <- page_sidebar(
     card(
       full_screen = FALSE,
       card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
-      plotlyOutput("prob_bar", height = "300px")
+      plotlyOutput("prob_bar", height = "400px")
     ),
 
     card(
@@ -364,7 +364,7 @@ server <- function(input, output, session) {
     row <- selected_row()
 
     div(
-      style = "padding: 15px;",
+      style = "padding: 5px;",
       p(
         HTML(paste0(
           "Probability of monogenic disease: <strong>",
@@ -481,7 +481,11 @@ server <- function(input, output, session) {
         bargap = 0.25,
         font = list(size = 13),
         uniformtext = list(minsize = 9, mode = "show"),
-        hoverlabel = list(font = list(size = 12)),
+        hoverlabel = list(
+          font = list(
+            size = 12,
+            color = "white"   # hover text colour
+          ),),
         xaxis = list(
           title = "",
           tickformat = ".0%",
