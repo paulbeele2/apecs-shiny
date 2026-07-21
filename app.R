@@ -209,7 +209,7 @@ ui <- page_sidebar(
 
       .svg-fit-box {
         width: 100%;
-        aspect-ratio: 10 / 16;
+        aspect-ratio: 3 / 4;
         display: flex;
         align-items: center;
         justify-content: center;
