@@ -451,7 +451,7 @@ server <- function(input, output, session) {
         type = "bar",
         orientation = "h",
         marker = list(
-          color = "#c1181b",          # monogenic red
+          color = "#ed2024",          # monogenic red
           line = list(color = "white", width = 1)
         ),
         text = ~monogenic_label,
@@ -502,9 +502,10 @@ server <- function(input, output, session) {
           x = 0.5,
           yanchor = "bottom",
           y = 1.01,
-          font = list(size = 12)
+          font = list(size = 12),
+          traceorder = "normal"  # keep legend in trace order
         ),
-        margin = list(l = 25, r = 8, t = 6, b = 8),
+        margin = list(l = 8, r = 8, t = 8, b = 8),
         dragmode = FALSE
       ) %>%
       config(
