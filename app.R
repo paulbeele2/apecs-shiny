@@ -312,7 +312,7 @@ ui <- page_sidebar(
   ),
 
   sidebar = sidebar(
-    width = 320,
+    width = 260,
     open = "desktop",
     selectInput("mode", "Model", choices = c("ALS only", "ALS + FTD")),
 
@@ -368,13 +368,12 @@ ui <- page_sidebar(
       full_screen = FALSE,
       card_header("How to count relatives"),
       div(
-        class = "svg-wrap",
+        style = "padding: 10px; height: 280px; overflow: hidden; display: flex; align-items: center; justify-content: center;",
         tags$img(
           src = "APECS_relative_count.svg",
-          class = "svg-card-img"
+          style = "max-width: 100%; max-height: 100%; width: auto; height: auto; display: block;"
         )
       )
-    ),
 
     card(
       full_screen = FALSE,
