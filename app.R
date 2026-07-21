@@ -203,14 +203,6 @@ ui <- page_sidebar(
         margin-bottom: 0;
       }
 
-      .svg-card .card-body {
-        overflow: hidden;
-      }
-
-      .ppv-box {
-        padding: 15px;
-      }
-
       .table-wrap {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -280,8 +272,32 @@ ui <- page_sidebar(
           line-height: 1.4;
         }
 
-        .svg-card .card-body > div {
-          height: 220px !important;
+        .svg-card .card-body {
+          overflow: hidden;
+          padding: 10px;
+        }
+
+        .svg-fit-box {
+          height: 280px;
+          width: 100%;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .svg-fit-img {
+          display: block;
+          max-width: 100%;
+          max-height: 100%;
+          width: auto;
+          height: auto;
+        }
+
+        @media (max-width: 768px) {
+          .svg-fit-box {
+            height: 220px;
+          }
         }
 
         .ppv-box {
@@ -349,10 +365,10 @@ ui <- page_sidebar(
       full_screen = FALSE,
       card_header("How to count relatives"),
       div(
-        style = "padding: 10px; height: 280px; overflow: hidden;",
+        class = "svg-fit-box",
         tags$img(
           src = "APECS_relative_count.svg",
-          style = "width: 100%; height: 100%; object-fit: contain; display: block;"
+          class = "svg-fit-img"
         )
       )
     ),
