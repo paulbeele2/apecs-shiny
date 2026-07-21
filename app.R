@@ -399,8 +399,24 @@ server <- function(input, output, session) {
         format_prob(prior_polygenic),
         format_prob(post_polygenic)
       ),
-      ci_low = c(NA, row$PPV_CI_low),
-      ci_high = c(NA, row$PPV_CI_high)
+      ci_low_label = c("—", format_prob(row$PPV_CI_low)),
+      ci_high_label = c("—", format_prob(row$PPV_CI_high))
+    )
+
+    plot_df$monogenic_hover <- paste0(
+      "<b>", plot_df$scenario, "</b><br>",
+      "Monogenic: ", plot_df$monogenic_label, "<br>",
+      "95% CI: ", plot_df$ci_low_label, " – ", plot_df$ci_high_label, "<br>",
+      "n = ", format_count(plot_df$monogenic_n), " of ", format_count(plot_df$total_n),
+      "<extra></extra>"
+    )
+
+    plot_df$polygenic_hover <- paste0(
+      "<b>", plot_df$scenario, "</b><br>",
+      "Polygenic: ", plot_df$polygenic_label, "<br>",
+      "95% CI: ", plot_df$ci_low_label, " – ", plot_df$ci_high_label, "<br>",
+      "n = ", format_count(plot_df$polygenic_n), " of ", format_count(plot_df$total_n),
+      "<extra></extra>"
     )
 
     darjeeling_cols <- grDevices::adjustcolor(
@@ -423,21 +439,7 @@ server <- function(input, output, session) {
         textposition = "inside",
         insidetextanchor = "middle",
         textfont = list(size = 11, color = "white"),
-        hovertemplate = ~ifelse(
-          scenario == "Family history",
-          paste0(
-            "<b>%{y}</b><br>",
-            "Monogenic: %{x:.1%}<br>",
-            "95% CI: ", format_prob(ci_low), " – ", format_prob(ci_high), "<br>",
-            "n = %{customdata[0]} of %{customdata[1]}<extra></extra>"
-          ),
-          paste0(
-            "<b>%{y}</b><br>",
-            "Monogenic: %{x:.1%}<br>",
-            "n = %{customdata[0]} of %{customdata[1]}<extra></extra>"
-          )
-        ),
-        customdata = ~Map(c, format_count(monogenic_n), format_count(total_n))
+        hovertemplate = ~monogenic_hover
       ) %>%
       add_trace(
         x = ~polygenic,
@@ -453,18 +455,14 @@ server <- function(input, output, session) {
         textposition = "inside",
         insidetextanchor = "middle",
         textfont = list(size = 11, color = "white"),
-        hovertemplate = paste(
-          "<b>%{y}</b><br>",
-          "Polygenic: %{x:.1%}<br>",
-          "n = %{customdata[0]} of %{customdata[1]}<extra></extra>"
-        ),
-        customdata = ~Map(c, format_count(polygenic_n), format_count(total_n))
+        hovertemplate = ~polygenic_hover
       ) %>%
       layout(
         barmode = "stack",
-        bargap = 0.35,
+        bargap = 0.25,
         font = list(size = 13),
         uniformtext = list(minsize = 9, mode = "show"),
+        hoverlabel = list(font = list(size = 12)),
         xaxis = list(
           title = "",
           tickformat = ".0%",
@@ -484,10 +482,10 @@ server <- function(input, output, session) {
           xanchor = "center",
           x = 0.5,
           yanchor = "bottom",
-          y = 1.02,
+          y = 1.01,
           font = list(size = 12)
         ),
-        margin = list(l = 95, r = 10, t = 10, b = 30),
+        margin = list(l = 85, r = 8, t = 6, b = 24),
         dragmode = FALSE
       ) %>%
       config(

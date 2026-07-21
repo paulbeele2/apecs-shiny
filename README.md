@@ -29,7 +29,8 @@ The app allows users to specify the number of affected relatives by degree of re
 ├── src/
 │   └── PPV_grid.R
 └── www/
-    └── APECS.png
+    └── APECS_logo.png
+    └── APECS_relative_count.svg
 ```
 
 ## File overview
