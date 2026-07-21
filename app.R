@@ -219,8 +219,8 @@ ui <- page_sidebar(
 
       .svg-fit-img {
         display: block;
-        max-width: 100%;
-        max-height: 100%;
+        max-width: 90%;
+        max-height: 90%;
         width: auto;
         height: auto;
         object-fit: contain;
@@ -301,6 +301,11 @@ ui <- page_sidebar(
 
         .svg-fit-box {
           height: 220px;
+        }
+
+        .svg-fit-img {
+          max-width: 88%;
+          max-height: 88%;
         }
 
         .ppv-box {
@@ -703,5 +708,6 @@ server <- function(input, output, session) {
     }
   })
 }
+
 
 shinyApp(ui = ui, server = server)
