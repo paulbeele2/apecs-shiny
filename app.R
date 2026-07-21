@@ -187,8 +187,11 @@ ui <- page_sidebar(
 
   sidebar = sidebar(
     width = 260,
-    open = open = list(desktop = "open", mobile = "closed"),
     position = "left",
+    open = list(
+      desktop = "open",
+      mobile  = "closed"   # closed by default; opens as an overlay from the left
+    ),
     
     selectInput("mode", "Model", choices = c("ALS only", "ALS + FTD")),
 
