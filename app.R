@@ -203,6 +203,10 @@ ui <- page_sidebar(
         margin-bottom: 0;
       }
 
+      .svg-card .card-body {
+        overflow: hidden;
+      }
+
       .ppv-box {
         padding: 15px;
       }
@@ -276,14 +280,8 @@ ui <- page_sidebar(
           line-height: 1.4;
         }
 
-        .svg-wrap {
-          min-height: 180px;
-          max-height: 240px;
-          padding: 8px;
-        }
-
-        .svg-card-img {
-          max-height: 220px;
+        .svg-card .card-body > div {
+          height: 220px !important;
         }
 
         .ppv-box {
@@ -347,6 +345,7 @@ ui <- page_sidebar(
     ),
 
     card(
+      class = "svg-card",
       full_screen = FALSE,
       card_header("How to count relatives"),
       div(
