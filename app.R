@@ -516,52 +516,53 @@ server <- function(input, output, session) {
       )
   })
 
-output$match_tbl <- renderUI({
-  row <- selected_row()
+  output$match_tbl <- renderUI({
+    row <- selected_row()
 
-  if (input$mode == "ALS only") {
-    tags$table(
-      class = "table table-striped table-bordered table-sm",
-      tags$thead(
-        tags$tr(
-          tags$th("ALS family history"),
-          tags$th("Number of monogenic index patients"),
-          tags$th("Number of polygenic index patients"),
-          tags$th("Prevalence of this specific family history")
-        )
-      ),
-      tags$tbody(
-        tags$tr(
-          tags$td(HTML(format_als_history(row))),
-          tags$td(format_count(row$n_mendelian)),
-          tags$td(format_count(row$n_non_mendelian)),
-          tags$td(format_prevalence(row$prevalence))
-        )
-      )
-    )
-  } else {
-    tags$table(
-      class = "table table-striped table-bordered table-sm",
-      tags$thead(
-        tags$tr(
-          tags$th("ALS family history"),
-          tags$th("FTD family history"),
-          tags$th("Number of monogenic index patients"),
-          tags$th("Number of polygenic index patients"),
-          tags$th("Family history prevalence")
-        )
-      ),
-      tags$tbody(
-        tags$tr(
-          tags$td(HTML(format_als_history(row))),
-          tags$td(HTML(format_ftd_history(row))),
-          tags$td(format_count(row$n_mendelian)),
-          tags$td(format_count(row$n_non_mendelian)),
-          tags$td(format_prevalence(row$prevalence))
+    if (input$mode == "ALS only") {
+      tags$table(
+        class = "table table-striped table-bordered table-sm",
+        tags$thead(
+          tags$tr(
+            tags$th("ALS family history"),
+            tags$th("Number of monogenic index patients"),
+            tags$th("Number of polygenic index patients"),
+            tags$th("Prevalence of this specific family history")
+          )
+        ),
+        tags$tbody(
+          tags$tr(
+            tags$td(HTML(format_als_history(row))),
+            tags$td(format_count(row$n_mendelian)),
+            tags$td(format_count(row$n_non_mendelian)),
+            tags$td(format_prevalence(row$prevalence))
+          )
         )
       )
-    )
-  }
-})
+    } else {
+      tags$table(
+        class = "table table-striped table-bordered table-sm",
+        tags$thead(
+          tags$tr(
+            tags$th("ALS family history"),
+            tags$th("FTD family history"),
+            tags$th("Number of monogenic index patients"),
+            tags$th("Number of polygenic index patients"),
+            tags$th("Family history prevalence")
+          )
+        ),
+        tags$tbody(
+          tags$tr(
+            tags$td(HTML(format_als_history(row))),
+            tags$td(HTML(format_ftd_history(row))),
+            tags$td(format_count(row$n_mendelian)),
+            tags$td(format_count(row$n_non_mendelian)),
+            tags$td(format_prevalence(row$prevalence))
+          )
+        )
+      )
+    }
+  })
+}
 
 shinyApp(ui = ui, server = server)
