@@ -485,7 +485,7 @@ server <- function(input, output, session) {
           font = list(
             size = 12,
             color = "white"   # hover text colour
-          ),),
+          )),
         xaxis = list(
           title = "",
           tickformat = ".0%",
