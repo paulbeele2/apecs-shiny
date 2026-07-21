@@ -27,7 +27,7 @@ prior_mendelian_n <- 44321
 prior_total_n <- 272651
 
 format_count <- function(x) {
-  format(x, big.mark = ".", decimal.mark = ",", scientific = FALSE, trim = TRUE)
+  format(x, big.mark = ",", decimal.mark = ".", scientific = FALSE, trim = TRUE)
 }
 
 format_prob <- function(x) {
@@ -35,8 +35,8 @@ format_prob <- function(x) {
     format(
       round(x * 100, 1),
       nsmall = 1,
-      big.mark = ".",
-      decimal.mark = ",",
+      big.mark = ",",
+      decimal.mark = ".",
       scientific = FALSE,
       trim = TRUE
     ),
@@ -52,8 +52,8 @@ format_prevalence <- function(x) {
     sapply(vals, function(v) {
       format(
         as.numeric(v),
-        big.mark = ".",
-        decimal.mark = ",",
+        big.mark = ",",
+        decimal.mark = ".",
         scientific = FALSE,
         trim = TRUE
       )
@@ -110,19 +110,81 @@ ui <- page_sidebar(
     ),
     div(
       div(
-        style = "font-weight: 600; font-size: 22px; line-height: 1.2;",
+        class = "app-title",
         HTML(
           "ALS Family History - Monogenic Probability Calculator<br>
-          <span style='font-weight: 400; font-size: 18px;'>Based on Mendelian and complex inheritance theory</span>"
+          <span class='app-subtitle'>Based on Mendelian and complex inheritance theory</span>"
         )
       ),
       div(
-        style = "font-size: 16px; color: #555; margin-top: 4px;",
+        class = "app-fullname",
         tags$em("APECS - ALS PEdigree simulations under a Complex and Simple disease model")
       )
     )
   ),
   theme = bs_theme(version = 5),
+
+  tags$head(
+    tags$style(HTML("
+      .app-title {
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+
+      .app-subtitle {
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 1.2;
+      }
+
+      .app-fullname {
+        font-size: 15px;
+        color: #555;
+        margin-top: 4px;
+      }
+
+      .card-header {
+        font-size: 15px !important;
+        font-weight: 600;
+      }
+
+      .card-body,
+      .card-body p,
+      .card-body div,
+      .card-body span,
+      .sidebar,
+      .sidebar .form-label,
+      .sidebar .selectize-input,
+      .sidebar .selectize-dropdown,
+      .sidebar .form-select,
+      .sidebar .control-label,
+      .sidebar label,
+      .table,
+      .table th,
+      .table td,
+      .shiny-input-container,
+      .shiny-input-container label,
+      .form-control,
+      .form-select {
+        font-size: 12px !important;
+        line-height: 1.5;
+      }
+
+      .sidebar .form-label,
+      .sidebar label,
+      .sidebar .control-label,
+      .table th {
+        font-weight: 600;
+      }
+
+      .shiny-html-output p:last-child,
+      .card-body p:last-child {
+        margin-bottom: 0;
+      }
+    "))
+  ),
+
   sidebar = sidebar(
     width = 320,
     selectInput("mode", "Model", choices = c("ALS only", "ALS + FTD")),
@@ -188,7 +250,7 @@ ui <- page_sidebar(
       full_screen = FALSE,
       card_header("Counting affected relatives"),
       div(
-        style = "padding: 15px; font-size: 16px; line-height: 1.6;",
+        style = "padding: 15px;",
         p(
           "Index patient (individual A) is marked by the black arrow. ",
           "The degree of relatives to individual A is illustrated by the number in each individual."
@@ -216,10 +278,7 @@ ui <- page_sidebar(
     card(
       full_screen = FALSE,
       card_header("Estimated Probability of Monogenic Disease (PPV)"),
-      div(
-        style = "padding: 15px; font-size: 18px; line-height: 1.7;",
-        verbatimTextOutput("ppv_text")
-      )
+      uiOutput("ppv_box")
     )
   ),
 
@@ -295,13 +354,24 @@ server <- function(input, output, session) {
       )
   })
 
-  output$ppv_text <- renderText({
+  output$ppv_box <- renderUI({
     row <- selected_row()
 
-    paste0(
-      "Probability of monogenic disease: ", format_prob(row$PPV),
-      " (95% CI ", format_prob(row$PPV_CI_low), " – ", format_prob(row$PPV_CI_high), ")\n",
-      "Based on ", format_count(row$n), " matching simulated pedigrees."
+    div(
+      style = "padding: 15px;",
+      p(
+        HTML(paste0(
+          "Probability of monogenic disease: <strong>",
+          format_prob(row$PPV),
+          "</strong> (95% CI <strong>",
+          format_prob(row$PPV_CI_low),
+          "</strong> – <strong>",
+          format_prob(row$PPV_CI_high),
+          "</strong>), based on ",
+          format_count(row$n),
+          " matching simulated pedigrees."
+        ))
+      )
     )
   })
 
@@ -364,6 +434,7 @@ server <- function(input, output, session) {
       ) %>%
       layout(
         barmode = "stack",
+        font = list(size = 12),
         xaxis = list(
           title = "Proportion",
           tickformat = ".0%",
@@ -378,7 +449,8 @@ server <- function(input, output, session) {
           xanchor = "center",
           x = 0.5,
           yanchor = "bottom",
-          y = 1.10
+          y = 1.10,
+          font = list(size = 12)
         ),
         margin = list(l = 180, r = 30, t = 20, b = 50)
       )
