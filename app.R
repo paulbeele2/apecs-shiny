@@ -186,7 +186,10 @@ ui <- page_sidebar(
   ),
 
   sidebar = sidebar(
-    width = 320,
+    width = 260,
+    open = open = list(desktop = "open", mobile = "closed"),
+    position = "left",
+    
     selectInput("mode", "Model", choices = c("ALS only", "ALS + FTD")),
 
     selectInput(
