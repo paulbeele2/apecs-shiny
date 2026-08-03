@@ -26,6 +26,8 @@ The app allows users to specify the number of affected relatives by degree of re
 ├── manifest.json
 ├── output_ppv_als_grid.csv
 ├── output_ppv_alsftd_grid.csv
+├── varying_params_als_grid.csv
+├── varying_params_alsftd_grid.csv
 ├── src/
 │   └── PPV_grid.R
 └── www/
@@ -37,8 +39,10 @@ The app allows users to specify the number of affected relatives by degree of re
 
 - `app.R` – main Shiny application.
 - `manifest.json` – deployment manifest generated with `rsconnect::writeManifest()`.
-- `output_ppv_als_grid.csv` – lookup table for the ALS-only model.
-- `output_ppv_alsftd_grid.csv` – lookup table for the ALS + FTD model.
+- `output_ppv_als_grid.csv` – lookup table for the ALS-only model, 50 million pedigree simulation.
+- `output_ppv_alsftd_grid.csv` – lookup table for the ALS + FTD model, 50 million pedigree simulation.
+- `varying_params_als_grid.csv` - lookup table for ALS-only model at various parameter settings for 10 million pedigree simulations.
+- `varying_params_alsftd_grid.csv` - lookup table for ALS + FTD model at various parameter settings for 10 million pedigree simulations.
 - `src/PPV_grid.R` – supporting code used to generate or process lookup grid content.
 - `www/APECS_logo.png` – application logo served as a static web asset.
 - `www/APECS_relative_count.svg` – visualization of how to count relatives.
@@ -74,6 +78,7 @@ rsconnect::writeManifest()
 The application depends on the following R packages:
 
 - shiny
+- shinyWidgets
 - readr
 - dplyr
 - bslib
@@ -82,7 +87,7 @@ The application depends on the following R packages:
 
 ## Purpose
 
-This application was developed to support interpretation of ALS family history patterns using pedigree simulation output generated under simple and complex disease models.
+This application was developed to support interpretation of ALS family history patterns using pedigree simulation output generated under simple and complex disease models, estimating the probability of underlying monogenic disease.
 
 ## Author
 
