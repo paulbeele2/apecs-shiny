@@ -450,7 +450,7 @@ ui <- page_fluid(
       id = "analysis_tab",
 
       nav_panel(
-        "Main parameter",
+        "Main parameters simulation",
         layout_sidebar(
           sidebar = sidebar(
             width = 260,
@@ -622,23 +622,24 @@ ui <- page_fluid(
 
             tags$hr(),
 
+
             selectInput(
               "common_var",
-              "ALS/FTD moderate penetrance allele",
+              "ALS/FTD common variant penetrance",
               choices = setNames(common_vals, format_param(common_vals)),
-              selected = common_vals[1]
+              selected = "0.2"
             ),
             selectInput(
               "rare_var",
-              "ALS/FTD high penetrance allele",
+              "ALS/FTD rare variant penetrance",
               choices = setNames(rare_vals, format_param(rare_vals)),
-              selected = rare_vals[1]
+              selected = "0.5"
             ),
             selectInput(
               "h2_var",
               "ALS heritability",
               choices = setNames(h2_vals, format_param(h2_vals)),
-              selected = h2_vals[1]
+              selected = "0.4"
             )
           ),
 
