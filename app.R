@@ -304,7 +304,7 @@ ui <- page_fluid(
     navset_card_tab(
       id = "analysis_tab",
 
-      nav_panel("Main parameters simulation",
+      nav_panel("Main simulation",
         layout_sidebar(
           sidebar = sidebar(
             width = 260, position = "left",
