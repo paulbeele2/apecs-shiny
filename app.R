@@ -281,7 +281,10 @@ ui <- page_fluid(
 
   div(class = "app-shell",
     div(class = "app-header",
-      tags$img(src = "APECS_logo.png", class = "app-header-logo"),
+      tags$img(
+        src = "APECS_logo.png",
+        class = "app-header-logo d-none d-md-block"
+      ),
       div(class = "app-header-text",
         div(class = "app-title",
           HTML("ALS Family History - Monogenic Probability Calculator<br>
