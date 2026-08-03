@@ -382,6 +382,52 @@ ui <- page_fluid(
 
 server <- function(input, output, session) {
 
+  syncing <- reactiveVal(FALSE)
+
+  sync_inputs <- function(from_suffix, to_suffix) {
+    if (isTRUE(syncing())) return(NULL)
+
+    syncing(TRUE)
+    on.exit(syncing(FALSE), add = TRUE)
+
+    updateSelectInput(session, paste0("mode_", to_suffix),
+      selected = input[[paste0("mode_", from_suffix)]])
+    updateSelectInput(session, paste0("als1_", to_suffix),
+      selected = input[[paste0("als1_", from_suffix)]])
+    updateSelectInput(session, paste0("als2_", to_suffix),
+      selected = input[[paste0("als2_", from_suffix)]])
+    updateSelectInput(session, paste0("als3_", to_suffix),
+      selected = input[[paste0("als3_", from_suffix)]])
+    updateSelectInput(session, paste0("ftd1_", to_suffix),
+      selected = input[[paste0("ftd1_", from_suffix)]])
+    updateSelectInput(session, paste0("ftd2_", to_suffix),
+      selected = input[[paste0("ftd2_", from_suffix)]])
+    updateSelectInput(session, paste0("ftd3_", to_suffix),
+      selected = input[[paste0("ftd3_", from_suffix)]])
+  }
+
+  observeEvent(
+    list(
+      input$mode_main, input$als1_main, input$als2_main, input$als3_main,
+      input$ftd1_main, input$ftd2_main, input$ftd3_main
+    ),
+    {
+      sync_inputs("main", "var")
+    },
+    ignoreInit = TRUE
+  )
+
+  observeEvent(
+    list(
+      input$mode_var, input$als1_var, input$als2_var, input$als3_var,
+      input$ftd1_var, input$ftd2_var, input$ftd3_var
+    ),
+    {
+      sync_inputs("var", "main")
+    },
+    ignoreInit = TRUE
+  )
+
   prior_main <- reactive({
     df <- if (input$mode_main == "ALS only") als_grid else alsftd_grid
     df %>% summarise(prior_total_n = sum(n), prior_mendelian_n = sum(n_mendelian))
@@ -390,9 +436,11 @@ server <- function(input, output, session) {
   prior_var <- reactive({
     df <- if (input$mode_var == "ALS only") varying_als_grid else varying_alsftd_grid
     df %>%
-      filter(ALSFTD_common == as.numeric(input$common_var),
-             ALSFTD_rare == as.numeric(input$rare_var),
-             h2als == as.numeric(input$h2_var)) %>%
+      filter(
+        ALSFTD_common == as.numeric(input$common_var),
+        ALSFTD_rare == as.numeric(input$rare_var),
+        h2als == as.numeric(input$h2_var)
+      ) %>%
       summarise(prior_total_n = sum(n), prior_mendelian_n = sum(n_mendelian))
   })
 
@@ -434,7 +482,9 @@ server <- function(input, output, session) {
 
     agg %>%
       mutate(
-        PPV = unname(ci["estimate"]), PPV_CI_low = unname(ci["ci_lower"]), PPV_CI_high = unname(ci["ci_upper"]),
+        PPV = unname(ci["estimate"]),
+        PPV_CI_low = unname(ci["ci_lower"]),
+        PPV_CI_high = unname(ci["ci_upper"]),
         prevalence = paste0(n, " out of ", prior_total_n, " patients")
       )
   })
@@ -443,9 +493,11 @@ server <- function(input, output, session) {
     df_all <- if (input$mode_var == "ALS only") varying_als_grid else varying_alsftd_grid
 
     df_param <- df_all %>%
-      filter(ALSFTD_common == as.numeric(input$common_var),
-             ALSFTD_rare == as.numeric(input$rare_var),
-             h2als == as.numeric(input$h2_var))
+      filter(
+        ALSFTD_common == as.numeric(input$common_var),
+        ALSFTD_rare == as.numeric(input$rare_var),
+        h2als == as.numeric(input$h2_var)
+      )
 
     validate(need(nrow(df_param) > 0, "No pedigrees found for this parameter combination."))
 
@@ -488,7 +540,9 @@ server <- function(input, output, session) {
         ALSFTD_common = as.numeric(input$common_var),
         ALSFTD_rare = as.numeric(input$rare_var),
         h2als = as.numeric(input$h2_var),
-        PPV = unname(ci["estimate"]), PPV_CI_low = unname(ci["ci_lower"]), PPV_CI_high = unname(ci["ci_upper"]),
+        PPV = unname(ci["estimate"]),
+        PPV_CI_low = unname(ci["ci_lower"]),
+        PPV_CI_high = unname(ci["ci_upper"]),
         prevalence = paste0(n, " out of ", total_selected_param_n, " patients")
       )
   })
@@ -508,16 +562,27 @@ server <- function(input, output, session) {
 
     validate(need(nrow(df) > 0, "No matching main-simulation pedigree pattern found for this family history."))
 
-    agg <- df %>% summarise(n = sum(n), n_mendelian = sum(n_mendelian), n_non_mendelian = sum(n_non_mendelian))
+    agg <- df %>%
+      summarise(
+        n = sum(n),
+        n_mendelian = sum(n_mendelian),
+        n_non_mendelian = sum(n_non_mendelian)
+      )
+
     ci <- wilson_ci(agg$n_mendelian, agg$n)
 
     agg %>%
-      mutate(PPV = unname(ci["estimate"]), PPV_CI_low = unname(ci["ci_lower"]), PPV_CI_high = unname(ci["ci_upper"]))
+      mutate(
+        PPV = unname(ci["estimate"]),
+        PPV_CI_low = unname(ci["ci_lower"]),
+        PPV_CI_high = unname(ci["ci_upper"])
+      )
   })
 
   output$ppv_box_main <- renderUI({
     row <- selected_row_main()
-    div(style = "padding: 5px;",
+    div(
+      style = "padding: 5px;",
       p(HTML(paste0(
         "Probability of monogenic disease: <strong>", format_prob(row$PPV), "</strong> (95% CI <strong>",
         format_prob(row$PPV_CI_low), "</strong> \u2013 <strong>", format_prob(row$PPV_CI_high), "</strong>);<br><br>",
@@ -542,7 +607,8 @@ server <- function(input, output, session) {
 
   output$ppv_box_var <- renderUI({
     row <- selected_row_var()
-    div(style = "padding: 5px;",
+    div(
+      style = "padding: 5px;",
       p(HTML(paste0(
         "Probability of monogenic disease: <strong>", format_prob(row$PPV), "</strong> (95% CI <strong>",
         format_prob(row$PPV_CI_low), "</strong> \u2013 <strong>", format_prob(row$PPV_CI_high), "</strong>);<br><br>",
@@ -558,6 +624,7 @@ server <- function(input, output, session) {
     row_var <- selected_row_var()
     row_main_ref <- selected_row_var_main_ref()
     prior <- prior_var()
+
     build_plot_var_compare(
       row_main_ref = row_main_ref,
       row_var = row_var,
