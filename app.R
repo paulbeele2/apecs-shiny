@@ -570,7 +570,7 @@ ui <- page_fluid(
         "Variable parameters",
         layout_sidebar(
           sidebar = sidebar(
-            width = 300,
+            width = 260,
             position = "left",
             open = list(
               desktop = "open",
@@ -624,13 +624,13 @@ ui <- page_fluid(
 
             selectInput(
               "common_var",
-              "ALS/FTD common variant penetrance",
+              "ALS/FTD moderate penetrance allele",
               choices = setNames(common_vals, format_param(common_vals)),
               selected = common_vals[1]
             ),
             selectInput(
               "rare_var",
-              "ALS/FTD rare variant penetrance",
+              "ALS/FTD high penetrance allele",
               choices = setNames(rare_vals, format_param(rare_vals)),
               selected = rare_vals[1]
             ),
@@ -871,9 +871,9 @@ server <- function(input, output, session) {
       style = "padding: 5px;",
       p(
         HTML(paste0(
-          "<strong>ALS/FTD common variant penetrance:</strong> ",
+          "<strong>ALS/FTD moderate penetrance allele:</strong> ",
           format_param(as.numeric(input$common_var)), "<br>",
-          "<strong>ALS/FTD rare variant penetrance:</strong> ",
+          "<strong>ALS/FTD high penetrance allele:</strong> ",
           format_param(as.numeric(input$rare_var)), "<br>",
           "<strong>ALS heritability:</strong> ",
           format_param(as.numeric(input$h2_var))
