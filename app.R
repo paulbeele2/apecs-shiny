@@ -93,7 +93,7 @@ build_plot <- function(row, prior_mendelian_n, prior_total_n) {
   post_polygenic <- row$n_non_mendelian / row$n
 
   plot_df <- data.frame(
-    scenario = factor(c("Prior", "Family history"), levels = c("Family history", "Prior")),
+    scenario = factor(c("Prior probability", "Family history"), levels = c("Family history", "Prior probability")),
     monogenic = c(prior_monogenic, post_monogenic),
     polygenic = c(prior_polygenic, post_polygenic),
     monogenic_n = c(prior_mendelian_n, row$n_mendelian),
@@ -156,8 +156,8 @@ build_plot_var_compare <- function(row_main_ref, row_var, prior_mendelian_n, pri
 
   plot_df <- data.frame(
     scenario = factor(
-      c("Prior", "Family history (main)", "Family history (selected)"),
-      levels = c("Family history (selected)", "Family history (main)", "Prior")
+      c("Family history<br>(selected)", "Prior probability", "Family history<br>(main)"),
+      levels = c("Family history<br>(main)", "Prior probability", "Family history<br>(selected)")
     ),
     monogenic = c(prior_monogenic, main_monogenic, var_monogenic),
     polygenic = c(prior_polygenic, main_polygenic, var_polygenic),
@@ -171,7 +171,7 @@ build_plot_var_compare <- function(row_main_ref, row_var, prior_mendelian_n, pri
   )
 
   plot_df$monogenic_hover <- ifelse(
-    plot_df$scenario == "Prior",
+    plot_df$scenario == "Prior probability",
     paste0("<b>", plot_df$scenario, "</b><br>Monogenic: ", plot_df$monogenic_label, "<br>n = ",
            format_count(plot_df$monogenic_n), " of ", format_count(plot_df$total_n), "<extra></extra>"),
     paste0("<b>", plot_df$scenario, "</b><br>Monogenic: ", plot_df$monogenic_label, "<br>95% CI: ",
@@ -180,7 +180,7 @@ build_plot_var_compare <- function(row_main_ref, row_var, prior_mendelian_n, pri
   )
 
   plot_df$polygenic_hover <- ifelse(
-    plot_df$scenario == "Prior",
+    plot_df$scenario == "Prior probability",
     paste0("<b>", plot_df$scenario, "</b><br>Polygenic: ", plot_df$polygenic_label, "<br>n = ",
            format_count(plot_df$polygenic_n), " of ", format_count(plot_df$total_n), "<extra></extra>"),
     paste0("<b>", plot_df$scenario, "</b><br>Polygenic: ", plot_df$polygenic_label, "<br>95% CI: ",
