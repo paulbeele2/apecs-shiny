@@ -156,8 +156,8 @@ build_plot_var_compare <- function(row_main_ref, row_var, prior_mendelian_n, pri
 
   plot_df <- data.frame(
     scenario = factor(
-      c("Prior probability", "Family history<br>(selected)", "Family history<br>(main)"),
-      levels = c("Family history<br>(main)", "Family history<br>(selected)", "Prior probability")
+      c("Prior probability", "Family history<br>(selected params)", "Family history<br>(main simulation)"),
+      levels = c("Family history<br>(main simulation)", "Family history<br>(selected params)", "Prior probability")
     ),
     monogenic = c(prior_monogenic, var_monogenic, main_monogenic),
     polygenic = c(prior_polygenic, var_polygenic, main_polygenic),
