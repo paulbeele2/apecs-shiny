@@ -156,8 +156,8 @@ build_plot_var_compare <- function(row_main_ref, row_var, prior_mendelian_n, pri
 
   plot_df <- data.frame(
     scenario = factor(
-      c("Prior probability", "Family history<br>(selected params)", "Family history<br>(main simulation)"),
-      levels = c("Family history<br>(main simulation)", "Family history<br>(selected params)", "Prior probability")
+      c("Prior probability<br>(selected params)", "Family history<br>(selected params)", "Family history<br>(main simulation)"),
+      levels = c("Family history<br>(main simulation)", "Family history<br>(selected params)", "Prior probability<br>(selected params)")
     ),
     monogenic = c(prior_monogenic, var_monogenic, main_monogenic),
     polygenic = c(prior_polygenic, var_polygenic, main_polygenic),
@@ -171,7 +171,7 @@ build_plot_var_compare <- function(row_main_ref, row_var, prior_mendelian_n, pri
   )
 
   plot_df$monogenic_hover <- ifelse(
-    plot_df$scenario == "Prior probability",
+    plot_df$scenario == "Prior probability<br>(selected params)",
     paste0("<b>", plot_df$scenario, "</b><br>Monogenic: ", plot_df$monogenic_label, "<br>n = ",
            format_count(plot_df$monogenic_n), " of ", format_count(plot_df$total_n), "<extra></extra>"),
     paste0("<b>", plot_df$scenario, "</b><br>Monogenic: ", plot_df$monogenic_label, "<br>95% CI: ",
@@ -180,7 +180,7 @@ build_plot_var_compare <- function(row_main_ref, row_var, prior_mendelian_n, pri
   )
 
   plot_df$polygenic_hover <- ifelse(
-    plot_df$scenario == "Prior probability",
+    plot_df$scenario == "Prior probability<br>(selected params)",
     paste0("<b>", plot_df$scenario, "</b><br>Polygenic: ", plot_df$polygenic_label, "<br>n = ",
            format_count(plot_df$polygenic_n), " of ", format_count(plot_df$total_n), "<extra></extra>"),
     paste0("<b>", plot_df$scenario, "</b><br>Polygenic: ", plot_df$polygenic_label, "<br>95% CI: ",
