@@ -96,6 +96,25 @@ format_ftd_history <- function(row) {
   )
 }
 
+counting_relatives_text <- div(
+  style = "padding: 5px;",
+  p(
+    "Index patient (individual A) is marked by the black arrow. ",
+    "The degree of relatives to individual A is illustrated by the number in each individual."
+  ),
+  p(
+    "Comorbid ALS-FTD (individual B) is only counted as ALS once."
+  ),
+  p(
+    "Note that for ‘any dementia’-affected relative, both FTD- (individual D) ",
+    "and other dementia-affected (individual C) relatives are considered."
+  ),
+  p(
+    "APECS was benchmarked in 3-generation pedigrees, limiting ",
+    "predictions involving more distant affected relatives."
+  )
+)
+
 wilson_ci <- function(x, n, conf_level = 0.95) {
   if (n == 0 || is.na(n) || is.na(x) || x < 0 || x > n) {
     return(c(estimate = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_))
@@ -213,12 +232,7 @@ build_plot <- function(row, prior_mendelian_n, prior_total_n) {
       bargap = 0.25,
       font = list(size = 13),
       uniformtext = list(minsize = 9, mode = "show"),
-      hoverlabel = list(
-        font = list(
-          size = 12,
-          color = "white"
-        )
-      ),
+      hoverlabel = list(font = list(size = 12, color = "white")),
       xaxis = list(
         title = "",
         tickformat = ".0%",
@@ -457,52 +471,19 @@ ui <- page_fluid(
           sidebar = sidebar(
             width = 260,
             position = "left",
-            open = list(
-              desktop = "open",
-              mobile = "closed"
-            ),
+            open = list(desktop = "open", mobile = "closed"),
 
             selectInput("mode_main", "Model", choices = c("ALS only", "ALS + FTD")),
 
-            selectInput(
-              "als1_main",
-              "1st-degree relatives with ALS",
-              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-              selected = "0"
-            ),
-            selectInput(
-              "als2_main",
-              "2nd-degree relatives with ALS",
-              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-              selected = "0"
-            ),
-            selectInput(
-              "als3_main",
-              "3rd-degree relatives with ALS",
-              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-              selected = "0"
-            ),
+            selectInput("als1_main", "1st-degree relatives with ALS", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0"),
+            selectInput("als2_main", "2nd-degree relatives with ALS", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0"),
+            selectInput("als3_main", "3rd-degree relatives with ALS", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0"),
 
             conditionalPanel(
               condition = "input.mode_main == 'ALS + FTD'",
-              selectInput(
-                "ftd1_main",
-                "1st-degree relatives with FTD",
-                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-                selected = "0"
-              ),
-              selectInput(
-                "ftd2_main",
-                "2nd-degree relatives with FTD",
-                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-                selected = "0"
-              ),
-              selectInput(
-                "ftd3_main",
-                "3rd-degree relatives with FTD",
-                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-                selected = "0"
-              )
+              selectInput("ftd1_main", "1st-degree relatives with FTD", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0"),
+              selectInput("ftd2_main", "2nd-degree relatives with FTD", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0"),
+              selectInput("ftd3_main", "3rd-degree relatives with FTD", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0")
             )
           ),
 
@@ -524,24 +505,7 @@ ui <- page_fluid(
             card(
               full_screen = FALSE,
               card_header("Counting affected relatives"),
-              div(
-                style = "padding: 5px;",
-                p(
-                  "Index patient (individual A) is marked by the black arrow. ",
-                  "The degree of relatives to individual A is illustrated by the number in each individual."
-                ),
-                p(
-                  "Comorbid ALS-FTD (individual B) is only counted as ALS once."
-                ),
-                p(
-                  "Note that for ‘any dementia’-affected relative, both FTD- (individual D) ",
-                  "and other dementia-affected (individual C) relatives are considered."
-                ),
-                p(
-                  "APECS was benchmarked in 3-generation pedigrees, limiting ",
-                  "predictions involving more distant affected relatives."
-                )
-              )
+              counting_relatives_text
             )
           ),
 
@@ -574,59 +538,26 @@ ui <- page_fluid(
           sidebar = sidebar(
             width = 260,
             position = "left",
-            open = list(
-              desktop = "open",
-              mobile = "closed"
-            ),
+            open = list(desktop = "open", mobile = "closed"),
 
             selectInput("mode_var", "Model", choices = c("ALS only", "ALS + FTD")),
 
-            selectInput(
-              "als1_var",
-              "1st-degree relatives with ALS",
-              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-              selected = "0"
-            ),
-            selectInput(
-              "als2_var",
-              "2nd-degree relatives with ALS",
-              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-              selected = "0"
-            ),
-            selectInput(
-              "als3_var",
-              "3rd-degree relatives with ALS",
-              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-              selected = "0"
-            ),
+            selectInput("als1_var", "1st-degree relatives with ALS", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0"),
+            selectInput("als2_var", "2nd-degree relatives with ALS", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0"),
+            selectInput("als3_var", "3rd-degree relatives with ALS", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0"),
 
             conditionalPanel(
               condition = "input.mode_var == 'ALS + FTD'",
-              selectInput(
-                "ftd1_var",
-                "1st-degree relatives with FTD",
-                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-                selected = "0"
-              ),
-              selectInput(
-                "ftd2_var",
-                "2nd-degree relatives with FTD",
-                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-                selected = "0"
-              ),
-              selectInput(
-                "ftd3_var",
-                "3rd-degree relatives with FTD",
-                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-                selected = "0"
-              )
+              selectInput("ftd1_var", "1st-degree relatives with FTD", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0"),
+              selectInput("ftd2_var", "2nd-degree relatives with FTD", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0"),
+              selectInput("ftd3_var", "3rd-degree relatives with FTD", choices = c("0", "1", "2", "3", "4", "5", "Unknown"), selected = "0")
             ),
 
             tags$hr(),
 
             sliderTextInput(
               inputId = "common_var",
-              label = "ALS/FTD common variant penetrance",
+              label = "ALS/FTD moderate penetrance allele",
               choices = format_param(common_vals),
               selected = format_param(0.20),
               grid = TRUE,
@@ -634,7 +565,7 @@ ui <- page_fluid(
             ),
             sliderTextInput(
               inputId = "rare_var",
-              label = "ALS/FTD rare variant penetrance",
+              label = "ALS/FTD high penetrance allele",
               choices = format_param(rare_vals),
               selected = format_param(0.50),
               grid = TRUE,
@@ -667,8 +598,8 @@ ui <- page_fluid(
 
             card(
               full_screen = FALSE,
-              card_header("Selected simulation parameters"),
-              uiOutput("param_summary_var")
+              card_header("Counting affected relatives"),
+              counting_relatives_text
             )
           ),
 
@@ -728,26 +659,14 @@ server <- function(input, output, session) {
   selected_row_main <- reactive({
     df <- if (input$mode_main == "ALS only") als_grid else alsftd_grid
 
-    if (input$als1_main != "Unknown") {
-      df <- df %>% filter(relatives_1st_als == as.numeric(input$als1_main))
-    }
-    if (input$als2_main != "Unknown") {
-      df <- df %>% filter(relatives_2nd_als == as.numeric(input$als2_main))
-    }
-    if (input$als3_main != "Unknown") {
-      df <- df %>% filter(relatives_3rd_als == as.numeric(input$als3_main))
-    }
+    if (input$als1_main != "Unknown") df <- df %>% filter(relatives_1st_als == as.numeric(input$als1_main))
+    if (input$als2_main != "Unknown") df <- df %>% filter(relatives_2nd_als == as.numeric(input$als2_main))
+    if (input$als3_main != "Unknown") df <- df %>% filter(relatives_3rd_als == as.numeric(input$als3_main))
 
     if (input$mode_main == "ALS + FTD") {
-      if (input$ftd1_main != "Unknown") {
-        df <- df %>% filter(relatives_1st_ftd_unique == as.numeric(input$ftd1_main))
-      }
-      if (input$ftd2_main != "Unknown") {
-        df <- df %>% filter(relatives_2nd_ftd_unique == as.numeric(input$ftd2_main))
-      }
-      if (input$ftd3_main != "Unknown") {
-        df <- df %>% filter(relatives_3rd_ftd_unique == as.numeric(input$ftd3_main))
-      }
+      if (input$ftd1_main != "Unknown") df <- df %>% filter(relatives_1st_ftd_unique == as.numeric(input$ftd1_main))
+      if (input$ftd2_main != "Unknown") df <- df %>% filter(relatives_2nd_ftd_unique == as.numeric(input$ftd2_main))
+      if (input$ftd3_main != "Unknown") df <- df %>% filter(relatives_3rd_ftd_unique == as.numeric(input$ftd3_main))
     }
 
     validate(
@@ -810,26 +729,14 @@ server <- function(input, output, session) {
 
     df <- df_param
 
-    if (input$als1_var != "Unknown") {
-      df <- df %>% filter(relatives_1st_als == as.numeric(input$als1_var))
-    }
-    if (input$als2_var != "Unknown") {
-      df <- df %>% filter(relatives_2nd_als == as.numeric(input$als2_var))
-    }
-    if (input$als3_var != "Unknown") {
-      df <- df %>% filter(relatives_3rd_als == as.numeric(input$als3_var))
-    }
+    if (input$als1_var != "Unknown") df <- df %>% filter(relatives_1st_als == as.numeric(input$als1_var))
+    if (input$als2_var != "Unknown") df <- df %>% filter(relatives_2nd_als == as.numeric(input$als2_var))
+    if (input$als3_var != "Unknown") df <- df %>% filter(relatives_3rd_als == as.numeric(input$als3_var))
 
     if (input$mode_var == "ALS + FTD") {
-      if (input$ftd1_var != "Unknown") {
-        df <- df %>% filter(relatives_1st_ftd_unique == as.numeric(input$ftd1_var))
-      }
-      if (input$ftd2_var != "Unknown") {
-        df <- df %>% filter(relatives_2nd_ftd_unique == as.numeric(input$ftd2_var))
-      }
-      if (input$ftd3_var != "Unknown") {
-        df <- df %>% filter(relatives_3rd_ftd_unique == as.numeric(input$ftd3_var))
-      }
+      if (input$ftd1_var != "Unknown") df <- df %>% filter(relatives_1st_ftd_unique == as.numeric(input$ftd1_var))
+      if (input$ftd2_var != "Unknown") df <- df %>% filter(relatives_2nd_ftd_unique == as.numeric(input$ftd2_var))
+      if (input$ftd3_var != "Unknown") df <- df %>% filter(relatives_3rd_ftd_unique == as.numeric(input$ftd3_var))
     }
 
     validate(
@@ -891,7 +798,10 @@ server <- function(input, output, session) {
           "</strong>);<br><br>",
           "Based on ",
           format_count(row$n),
-          " matching simulated pedigrees."
+          " matching simulated pedigrees.<br><br>",
+          "<strong>ALS/FTD moderate penetrance allele:</strong> 21% (C9orf72-like)<br>",
+          "<strong>ALS/FTD high penetrance allele:</strong> 50% (FUS/SOD1-like)<br>",
+          "<strong>ALS heritability:</strong> 40%"
         ))
       )
     )
@@ -906,22 +816,6 @@ server <- function(input, output, session) {
   output$match_tbl_main <- renderUI({
     row <- selected_row_main()
     make_match_table(row, input$mode_main)
-  })
-
-  output$param_summary_var <- renderUI({
-    div(
-      style = "padding: 5px;",
-      p(
-        HTML(paste0(
-          "<strong>ALS/FTD moderate penetrance allele:</strong> ",
-          format_param(as.numeric(input$common_var)), "<br>",
-          "<strong>ALS/FTD high penetrance allele:</strong> ",
-          format_param(as.numeric(input$rare_var)), "<br>",
-          "<strong>ALS heritability:</strong> ",
-          format_param(as.numeric(input$h2_var))
-        ))
-      )
-    )
   })
 
   output$ppv_box_var <- renderUI({
@@ -940,7 +834,13 @@ server <- function(input, output, session) {
           "</strong>);<br><br>",
           "Based on ",
           format_count(row$n),
-          " matching simulated pedigrees."
+          " matching simulated pedigrees.<br><br>",
+          "<strong>ALS/FTD moderate penetrance allele:</strong> ",
+          format_prob(as.numeric(input$common_var)), "<br>",
+          "<strong>ALS/FTD high penetrance allele:</strong> ",
+          format_prob(as.numeric(input$rare_var)), "<br>",
+          "<strong>ALS heritability:</strong> ",
+          format_prob(as.numeric(input$h2_var))
         ))
       )
     )
