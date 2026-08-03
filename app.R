@@ -156,7 +156,7 @@ build_plot_var_compare <- function(row_main_ref, row_var, prior_mendelian_n, pri
 
   plot_df <- data.frame(
     scenario = factor(
-      c("Family history<br>(selected)", "Prior probability", "Family history<br>(main)"),
+      c("Family history<br>(selected)", "Family history<br>(main)", "Prior probability"),
       levels = c("Family history<br>(main)", "Family history<br>(selected)", "Prior probability")
     ),
     monogenic = c(prior_monogenic, main_monogenic, var_monogenic),
@@ -323,7 +323,7 @@ ui <- page_fluid(
             card(full_screen = FALSE, card_header("Estimated probability of monogenic disease"),
               uiOutput("ppv_box_main"))
           ),
-          card(card_header("Simulated Pedigrees matching family history"), uiOutput("match_tbl_main"))
+          card(card_header("Simulated pedigrees matching family history"), uiOutput("match_tbl_main"))
         )
       ),
 
