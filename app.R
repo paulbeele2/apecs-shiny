@@ -27,9 +27,6 @@ alsftd_grid <- read_csv("output_ppv_alsftd_grid.csv", show_col_types = FALSE)
 varying_als_grid <- read_csv("varying_param_als_grid.csv", show_col_types = FALSE)
 varying_alsftd_grid <- read_csv("varying_param_alsftd_grid.csv", show_col_types = FALSE)
 
-prior_mendelian_n <- 44321
-prior_total_n <- 272651
-
 common_vals <- sort(unique(varying_als_grid$ALSFTD_common))
 rare_vals   <- sort(unique(varying_als_grid$ALSFTD_rare))
 h2_vals     <- sort(unique(varying_als_grid$h2als))
@@ -703,6 +700,31 @@ ui <- page_fluid(
 
 server <- function(input, output, session) {
 
+  prior_main <- reactive({
+    df <- if (input$mode_main == "ALS only") als_grid else alsftd_grid
+
+    df %>%
+      summarise(
+        prior_total_n = sum(n),
+        prior_mendelian_n = sum(n_mendelian)
+      )
+  })
+
+  prior_var <- reactive({
+    df <- if (input$mode_var == "ALS only") varying_als_grid else varying_alsftd_grid
+
+    df %>%
+      filter(
+        ALSFTD_common == as.numeric(input$common_var),
+        ALSFTD_rare == as.numeric(input$rare_var),
+        h2als == as.numeric(input$h2_var)
+      ) %>%
+      summarise(
+        prior_total_n = sum(n),
+        prior_mendelian_n = sum(n_mendelian)
+      )
+  })
+
   selected_row_main <- reactive({
     df <- if (input$mode_main == "ALS only") als_grid else alsftd_grid
 
@@ -731,6 +753,8 @@ server <- function(input, output, session) {
     validate(
       need(nrow(df) > 0, "No matching pedigree pattern found in the lookup table.")
     )
+
+    prior_total_n <- prior_main()$prior_total_n[[1]]
 
     agg <- df %>%
       summarise(
@@ -875,7 +899,8 @@ server <- function(input, output, session) {
 
   output$prob_bar_main <- renderPlotly({
     row <- selected_row_main()
-    build_plot(row, prior_mendelian_n, prior_total_n)
+    prior <- prior_main()
+    build_plot(row, prior$prior_mendelian_n[[1]], prior$prior_total_n[[1]])
   })
 
   output$match_tbl_main <- renderUI({
@@ -923,7 +948,8 @@ server <- function(input, output, session) {
 
   output$prob_bar_var <- renderPlotly({
     row <- selected_row_var()
-    build_plot(row, prior_mendelian_n, prior_total_n)
+    prior <- prior_var()
+    build_plot(row, prior$prior_mendelian_n[[1]], prior$prior_total_n[[1]])
   })
 
   output$match_tbl_var <- renderUI({
