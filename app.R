@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyWidgets)
 library(readr)
 library(dplyr)
 library(bslib)
@@ -397,6 +398,10 @@ ui <- page_fluid(
         font-weight: 600;
       }
 
+      .irs-grid-text {
+        font-size: 11px !important;
+      }
+
       @media (max-width: 767px) {
         .app-header {
           align-items: flex-start;
@@ -622,24 +627,29 @@ ui <- page_fluid(
 
             tags$hr(),
 
-
-            selectInput(
-              "common_var",
-              "ALS/FTD common variant penetrance",
-              choices = setNames(common_vals, format_param(common_vals)),
-              selected = "0.2"
+            sliderTextInput(
+              inputId = "common_var",
+              label = "ALS/FTD common variant penetrance",
+              choices = format_param(common_vals),
+              selected = format_param(0.20),
+              grid = TRUE,
+              force_edges = TRUE
             ),
-            selectInput(
-              "rare_var",
-              "ALS/FTD rare variant penetrance",
-              choices = setNames(rare_vals, format_param(rare_vals)),
-              selected = "0.5"
+            sliderTextInput(
+              inputId = "rare_var",
+              label = "ALS/FTD rare variant penetrance",
+              choices = format_param(rare_vals),
+              selected = format_param(0.50),
+              grid = TRUE,
+              force_edges = TRUE
             ),
-            selectInput(
-              "h2_var",
-              "ALS heritability",
-              choices = setNames(h2_vals, format_param(h2_vals)),
-              selected = "0.4"
+            sliderTextInput(
+              inputId = "h2_var",
+              label = "ALS heritability",
+              choices = format_param(h2_vals),
+              selected = format_param(0.40),
+              grid = TRUE,
+              force_edges = TRUE
             )
           ),
 
@@ -759,14 +769,22 @@ server <- function(input, output, session) {
   })
 
   selected_row_var <- reactive({
-    df <- if (input$mode_var == "ALS only") varying_als_grid else varying_alsftd_grid
+    df_all <- if (input$mode_var == "ALS only") varying_als_grid else varying_alsftd_grid
 
-    df <- df %>%
+    df_param <- df_all %>%
       filter(
         ALSFTD_common == as.numeric(input$common_var),
         ALSFTD_rare == as.numeric(input$rare_var),
         h2als == as.numeric(input$h2_var)
       )
+
+    validate(
+      need(nrow(df_param) > 0, "No pedigrees found for this parameter combination.")
+    )
+
+    total_selected_param_n <- sum(df_param$n)
+
+    df <- df_param
 
     if (input$als1_var != "Unknown") {
       df <- df %>% filter(relatives_1st_als == as.numeric(input$als1_var))
@@ -793,8 +811,6 @@ server <- function(input, output, session) {
     validate(
       need(nrow(df) > 0, "No matching pedigree pattern found for this family history and parameter combination.")
     )
-
-    total_selected_param_n <- sum(df$n)
 
     agg <- df %>%
       summarise(
