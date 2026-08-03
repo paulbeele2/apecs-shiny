@@ -587,9 +587,9 @@ server <- function(input, output, session) {
         "Probability of monogenic disease: <strong>", format_prob(row$PPV), "</strong> (95% CI <strong>",
         format_prob(row$PPV_CI_low), "</strong> \u2013 <strong>", format_prob(row$PPV_CI_high), "</strong>);<br><br>",
         "Based on ", format_count(row$n), " matching simulated pedigrees.<br><br>",
-        "<strong>ALS/FTD moderate allele penetrance:</strong> 21% (C9orf72-like)<br>",
-        "<strong>ALS/FTD high allele penetrance:</strong> 50% (FUS/SOD1-like)<br>",
-        "<strong>ALS heritability:</strong> 40%"
+        "<strong>ALS/FTD moderate allele penetrance:</strong> 21.0% (C9orf72-like)<br>",
+        "<strong>ALS/FTD high allele penetrance:</strong> 50.0% (FUS/SOD1-like)<br>",
+        "<strong>ALS heritability:</strong> 40.0%"
       )))
     )
   })
