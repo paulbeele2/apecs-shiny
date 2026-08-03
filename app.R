@@ -318,12 +318,12 @@ ui <- page_fluid(
             card(full_screen = FALSE, card_header("Counting affected relatives"), counting_relatives_text)
           ),
           layout_columns(col_widths = c(8, 4),
-            card(full_screen = FALSE, card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
+            card(full_screen = FALSE, card_header("Prior probability vs. family history probability for monogenic disease"),
               plotlyOutput("prob_bar_main", height = "400px")),
-            card(full_screen = FALSE, card_header("Estimated Probability of Monogenic Disease"),
+            card(full_screen = FALSE, card_header("Estimated probability of monogenic disease"),
               uiOutput("ppv_box_main"))
           ),
-          card(card_header("Simulated Pedigrees matching Family History"), uiOutput("match_tbl_main"))
+          card(card_header("Simulated Pedigrees matching family history"), uiOutput("match_tbl_main"))
         )
       ),
 
@@ -358,12 +358,12 @@ ui <- page_fluid(
             card(full_screen = FALSE, card_header("Counting affected relatives"), counting_relatives_text)
           ),
           layout_columns(col_widths = c(8, 4),
-            card(full_screen = FALSE, card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
+            card(full_screen = FALSE, card_header("Prior probability vs. family history probability for monogenic disease"),
               plotlyOutput("prob_bar_var", height = "400px")),
-            card(full_screen = FALSE, card_header("Estimated Probability of Monogenic Disease"),
+            card(full_screen = FALSE, card_header("Estimated probability of monogenic disease"),
               uiOutput("ppv_box_var"))
           ),
-          card(card_header("Simulated Pedigrees matching Family History"), uiOutput("match_tbl_var"))
+          card(card_header("Simulated pedigrees matching family history"), uiOutput("match_tbl_var"))
         )
       )
     )
