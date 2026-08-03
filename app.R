@@ -7,6 +7,8 @@ library(plotly)
 required_files <- c(
   "output_ppv_als_grid.csv",
   "output_ppv_alsftd_grid.csv",
+  "varying_param_als_grid.csv",
+  "varying_param_alsftd_grid.csv",
   "www/APECS_logo.png",
   "www/APECS_relative_count.svg"
 )
@@ -21,9 +23,15 @@ if (length(missing_files) > 0) {
 
 als_grid <- read_csv("output_ppv_als_grid.csv", show_col_types = FALSE)
 alsftd_grid <- read_csv("output_ppv_alsftd_grid.csv", show_col_types = FALSE)
+varying_als_grid <- read_csv("varying_param_als_grid.csv", show_col_types = FALSE)
+varying_alsftd_grid <- read_csv("varying_param_alsftd_grid.csv", show_col_types = FALSE)
 
 prior_mendelian_n <- 44321
 prior_total_n <- 272651
+
+common_vals <- sort(unique(varying_als_grid$ALSFTD_common))
+rare_vals   <- sort(unique(varying_als_grid$ALSFTD_rare))
+h2_vals     <- sort(unique(varying_als_grid$h2als))
 
 format_count <- function(x) {
   format(x, big.mark = ",", decimal.mark = ".", scientific = FALSE, trim = TRUE)
@@ -40,6 +48,17 @@ format_prob <- function(x) {
       trim = TRUE
     ),
     "%"
+  )
+}
+
+format_param <- function(x) {
+  format(
+    x,
+    nsmall = 2,
+    big.mark = ",",
+    decimal.mark = ".",
+    scientific = FALSE,
+    trim = TRUE
   )
 }
 
@@ -99,13 +118,197 @@ wilson_ci <- function(x, n, conf_level = 0.95) {
   )
 }
 
-ui <- page_sidebar(
+build_plot <- function(row, prior_mendelian_n, prior_total_n) {
+  prior_monogenic <- prior_mendelian_n / prior_total_n
+  prior_polygenic <- 1 - prior_monogenic
+  post_monogenic <- row$n_mendelian / row$n
+  post_polygenic <- row$n_non_mendelian / row$n
+
+  plot_df <- data.frame(
+    scenario = factor(c("Prior", "Family history"), levels = c("Family history", "Prior")),
+    monogenic = c(prior_monogenic, post_monogenic),
+    polygenic = c(prior_polygenic, post_polygenic),
+    monogenic_n = c(prior_mendelian_n, row$n_mendelian),
+    polygenic_n = c(prior_total_n - prior_mendelian_n, row$n_non_mendelian),
+    total_n = c(prior_total_n, row$n),
+    monogenic_label = c(
+      format_prob(prior_monogenic),
+      format_prob(post_monogenic)
+    ),
+    polygenic_label = c(
+      format_prob(prior_polygenic),
+      format_prob(post_polygenic)
+    ),
+    ci_low_label = c("—", format_prob(row$PPV_CI_low)),
+    ci_high_label = c("—", format_prob(row$PPV_CI_high))
+  )
+
+  plot_df$monogenic_hover <- ifelse(
+    plot_df$scenario == "Family history",
+    paste0(
+      "<b>", plot_df$scenario, "</b><br>",
+      "Monogenic: ", plot_df$monogenic_label, "<br>",
+      "95% CI: ", plot_df$ci_low_label, " – ", plot_df$ci_high_label, "<br>",
+      "n = ", format_count(plot_df$monogenic_n), " of ", format_count(plot_df$total_n),
+      "<extra></extra>"
+    ),
+    paste0(
+      "<b>", plot_df$scenario, "</b><br>",
+      "Monogenic: ", plot_df$monogenic_label, "<br>",
+      "n = ", format_count(plot_df$monogenic_n), " of ", format_count(plot_df$total_n),
+      "<extra></extra>"
+    )
+  )
+
+  plot_df$polygenic_hover <- ifelse(
+    plot_df$scenario == "Family history",
+    paste0(
+      "<b>", plot_df$scenario, "</b><br>",
+      "Polygenic: ", plot_df$polygenic_label, "<br>",
+      "95% CI: ", plot_df$ci_low_label, " – ", plot_df$ci_high_label, "<br>",
+      "n = ", format_count(plot_df$polygenic_n), " of ", format_count(plot_df$total_n),
+      "<extra></extra>"
+    ),
+    paste0(
+      "<b>", plot_df$scenario, "</b><br>",
+      "Polygenic: ", plot_df$polygenic_label, "<br>",
+      "n = ", format_count(plot_df$polygenic_n), " of ", format_count(plot_df$total_n),
+      "<extra></extra>"
+    )
+  )
+
+  plot_ly(plot_df) %>%
+    add_trace(
+      x = ~monogenic,
+      y = ~scenario,
+      name = "Monogenic",
+      type = "bar",
+      orientation = "h",
+      marker = list(
+        color = "#ed2024",
+        line = list(color = "white", width = 1)
+      ),
+      text = ~monogenic_label,
+      textposition = "inside",
+      insidetextanchor = "middle",
+      textfont = list(size = 11, color = "white"),
+      hovertemplate = ~monogenic_hover
+    ) %>%
+    add_trace(
+      x = ~polygenic,
+      y = ~scenario,
+      name = "Polygenic",
+      type = "bar",
+      orientation = "h",
+      marker = list(
+        color = "#5cbcd6",
+        line = list(color = "white", width = 1)
+      ),
+      text = ~polygenic_label,
+      textposition = "inside",
+      insidetextanchor = "middle",
+      textfont = list(size = 11, color = "white"),
+      hovertemplate = ~polygenic_hover
+    ) %>%
+    layout(
+      barmode = "stack",
+      bargap = 0.25,
+      font = list(size = 13),
+      uniformtext = list(minsize = 9, mode = "show"),
+      hoverlabel = list(
+        font = list(
+          size = 12,
+          color = "white"
+        )
+      ),
+      xaxis = list(
+        title = "",
+        tickformat = ".0%",
+        range = c(0, 1),
+        showgrid = TRUE,
+        gridcolor = "#e9ecef",
+        zeroline = FALSE,
+        fixedrange = TRUE
+      ),
+      yaxis = list(
+        title = "",
+        automargin = TRUE,
+        fixedrange = TRUE
+      ),
+      legend = list(
+        orientation = "h",
+        xanchor = "center",
+        x = 0.5,
+        yanchor = "bottom",
+        y = 1.01,
+        font = list(size = 12),
+        traceorder = "normal"
+      ),
+      margin = list(l = 8, r = 8, t = 8, b = 8),
+      dragmode = FALSE
+    ) %>%
+    config(
+      displayModeBar = FALSE,
+      staticPlot = FALSE,
+      scrollZoom = FALSE,
+      doubleClick = FALSE,
+      showTips = FALSE
+    )
+}
+
+make_match_table <- function(row, mode) {
+  if (mode == "ALS only") {
+    tags$table(
+      class = "table table-striped table-bordered table-sm",
+      tags$thead(
+        tags$tr(
+          tags$th("ALS family history"),
+          tags$th("Number of monogenic index patients"),
+          tags$th("Number of polygenic index patients"),
+          tags$th("Prevalence of this specific family history")
+        )
+      ),
+      tags$tbody(
+        tags$tr(
+          tags$td(HTML(format_als_history(row))),
+          tags$td(format_count(row$n_mendelian)),
+          tags$td(format_count(row$n_non_mendelian)),
+          tags$td(format_prevalence(row$prevalence))
+        )
+      )
+    )
+  } else {
+    tags$table(
+      class = "table table-striped table-bordered table-sm",
+      tags$thead(
+        tags$tr(
+          tags$th("ALS family history"),
+          tags$th("FTD family history"),
+          tags$th("Number of monogenic index patients"),
+          tags$th("Number of polygenic index patients"),
+          tags$th("Family history prevalence")
+        )
+      ),
+      tags$tbody(
+        tags$tr(
+          tags$td(HTML(format_als_history(row))),
+          tags$td(HTML(format_ftd_history(row))),
+          tags$td(format_count(row$n_mendelian)),
+          tags$td(format_count(row$n_non_mendelian)),
+          tags$td(format_prevalence(row$prevalence))
+        )
+      )
+    )
+  }
+}
+
+ui <- page_navbar(
   title = div(
     style = "display: flex; align-items: center; justify-content: flex-start; width: 100%; gap: 10px;",
     tags$img(
       src = "APECS_logo.png",
       height = "100px",
-      class = "d-none d-md-block",  # hide on < md, show from md+
+      class = "d-none d-md-block",
       style = "object-fit: contain;"
     ),
     div(
@@ -185,142 +388,269 @@ ui <- page_sidebar(
     "))
   ),
 
-  sidebar = sidebar(
-    width = 260,
-    position = "left",
-    open = list(
-      desktop = "open",
-      mobile  = "closed"   # closed by default; opens as an overlay from the left
-    ),
-    
-    selectInput("mode", "Model", choices = c("ALS only", "ALS + FTD")),
+  nav_panel(
+    "Main parameter",
+    layout_sidebar(
+      sidebar = sidebar(
+        width = 260,
+        position = "left",
+        open = list(
+          desktop = "open",
+          mobile = "closed"
+        ),
 
-    selectInput(
-      "als1",
-      "1st-degree relatives with ALS",
-      choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-      selected = "0"
-    ),
-    selectInput(
-      "als2",
-      "2nd-degree relatives with ALS",
-      choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-      selected = "0"
-    ),
-    selectInput(
-      "als3",
-      "3rd-degree relatives with ALS",
-      choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-      selected = "0"
-    ),
+        selectInput("mode_main", "Model", choices = c("ALS only", "ALS + FTD")),
 
-    conditionalPanel(
-      condition = "input.mode == 'ALS + FTD'",
-      selectInput(
-        "ftd1",
-        "1st-degree relatives with FTD",
-        choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-        selected = "0"
-      ),
-      selectInput(
-        "ftd2",
-        "2nd-degree relatives with FTD",
-        choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-        selected = "0"
-      ),
-      selectInput(
-        "ftd3",
-        "3rd-degree relatives with FTD",
-        choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-        selected = "0"
-      )
-    )
-  ),
+        selectInput(
+          "als1_main",
+          "1st-degree relatives with ALS",
+          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+          selected = "0"
+        ),
+        selectInput(
+          "als2_main",
+          "2nd-degree relatives with ALS",
+          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+          selected = "0"
+        ),
+        selectInput(
+          "als3_main",
+          "3rd-degree relatives with ALS",
+          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+          selected = "0"
+        ),
 
-  layout_columns(
-    col_widths = c(8, 4),
-
-    card(
-      full_screen = FALSE,
-      card_header("How to count relatives"),
-      div(
-        style = "padding: 4px; height: 100%; overflow: hidden;",
-        tags$img(
-          src = "APECS_relative_count.svg",
-          style = "width: 100%; height: 100%; object-fit: contain; display: block;"
+        conditionalPanel(
+          condition = "input.mode_main == 'ALS + FTD'",
+          selectInput(
+            "ftd1_main",
+            "1st-degree relatives with FTD",
+            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+            selected = "0"
+          ),
+          selectInput(
+            "ftd2_main",
+            "2nd-degree relatives with FTD",
+            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+            selected = "0"
+          ),
+          selectInput(
+            "ftd3_main",
+            "3rd-degree relatives with FTD",
+            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+            selected = "0"
+          )
         )
-      )
-    ),
+      ),
 
-    card(
-      full_screen = FALSE,
-      card_header("Counting affected relatives"),
-      div(
-        style = "padding: 5px;",
-        p(
-          "Index patient (individual A) is marked by the black arrow. ",
-          "The degree of relatives to individual A is illustrated by the number in each individual."
+      layout_columns(
+        col_widths = c(8, 4),
+
+        card(
+          full_screen = FALSE,
+          card_header("How to count relatives"),
+          div(
+            style = "padding: 4px; height: 100%; overflow: hidden;",
+            tags$img(
+              src = "APECS_relative_count.svg",
+              style = "width: 100%; height: 100%; object-fit: contain; display: block;"
+            )
+          )
         ),
-        p(
-          "Comorbid ALS-FTD (individual B) is only counted as ALS once."
-        ),
-        p(
-          "Note that for ‘any dementia’-affected relative, both FTD- (individual D) ",
-          "and other dementia-affected (individual C) relatives are considered."
-        ),
-        p(
-          "APECS was benchmarked in 3-generation pedigrees, limiting ",
-          "predictions involving more distant affected relatives."
+
+        card(
+          full_screen = FALSE,
+          card_header("Counting affected relatives"),
+          div(
+            style = "padding: 5px;",
+            p(
+              "Index patient (individual A) is marked by the black arrow. ",
+              "The degree of relatives to individual A is illustrated by the number in each individual."
+            ),
+            p(
+              "Comorbid ALS-FTD (individual B) is only counted as ALS once."
+            ),
+            p(
+              "Note that for ‘any dementia’-affected relative, both FTD- (individual D) ",
+              "and other dementia-affected (individual C) relatives are considered."
+            ),
+            p(
+              "APECS was benchmarked in 3-generation pedigrees, limiting ",
+              "predictions involving more distant affected relatives."
+            )
+          )
         )
+      ),
+
+      layout_columns(
+        col_widths = c(8, 4),
+
+        card(
+          full_screen = FALSE,
+          card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
+          plotlyOutput("prob_bar_main", height = "400px")
+        ),
+
+        card(
+          full_screen = FALSE,
+          card_header("Estimated Probability of Monogenic Disease"),
+          uiOutput("ppv_box_main")
+        )
+      ),
+
+      card(
+        card_header("Simulated Pedigrees matching Family History"),
+        uiOutput("match_tbl_main")
       )
     )
   ),
 
-  layout_columns(
-    col_widths = c(8, 4),
+  nav_panel(
+    "Variable parameters",
+    layout_sidebar(
+      sidebar = sidebar(
+        width = 300,
+        position = "left",
+        open = list(
+          desktop = "open",
+          mobile = "closed"
+        ),
 
-    card(
-      full_screen = FALSE,
-      card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
-      plotlyOutput("prob_bar", height = "400px")
-    ),
+        selectInput("mode_var", "Model", choices = c("ALS only", "ALS + FTD")),
 
-    card(
-      full_screen = FALSE,
-      card_header("Estimated Probability of Monogenic Disease"),
-      uiOutput("ppv_box")
+        selectInput(
+          "als1_var",
+          "1st-degree relatives with ALS",
+          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+          selected = "0"
+        ),
+        selectInput(
+          "als2_var",
+          "2nd-degree relatives with ALS",
+          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+          selected = "0"
+        ),
+        selectInput(
+          "als3_var",
+          "3rd-degree relatives with ALS",
+          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+          selected = "0"
+        ),
+
+        conditionalPanel(
+          condition = "input.mode_var == 'ALS + FTD'",
+          selectInput(
+            "ftd1_var",
+            "1st-degree relatives with FTD",
+            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+            selected = "0"
+          ),
+          selectInput(
+            "ftd2_var",
+            "2nd-degree relatives with FTD",
+            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+            selected = "0"
+          ),
+          selectInput(
+            "ftd3_var",
+            "3rd-degree relatives with FTD",
+            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+            selected = "0"
+          )
+        ),
+
+        tags$hr(),
+
+        selectInput(
+          "common_var",
+          "ALS/FTD common variant penetrance",
+          choices = setNames(common_vals, format_param(common_vals)),
+          selected = common_vals[1]
+        ),
+        selectInput(
+          "rare_var",
+          "ALS/FTD rare variant penetrance",
+          choices = setNames(rare_vals, format_param(rare_vals)),
+          selected = rare_vals[1]
+        ),
+        selectInput(
+          "h2_var",
+          "ALS heritability",
+          choices = setNames(h2_vals, format_param(h2_vals)),
+          selected = h2_vals[1]
+        )
+      ),
+
+      layout_columns(
+        col_widths = c(8, 4),
+
+        card(
+          full_screen = FALSE,
+          card_header("How to count relatives"),
+          div(
+            style = "padding: 4px; height: 100%; overflow: hidden;",
+            tags$img(
+              src = "APECS_relative_count.svg",
+              style = "width: 100%; height: 100%; object-fit: contain; display: block;"
+            )
+          )
+        ),
+
+        card(
+          full_screen = FALSE,
+          card_header("Selected simulation parameters"),
+          uiOutput("param_summary_var")
+        )
+      ),
+
+      layout_columns(
+        col_widths = c(8, 4),
+
+        card(
+          full_screen = FALSE,
+          card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
+          plotlyOutput("prob_bar_var", height = "400px")
+        ),
+
+        card(
+          full_screen = FALSE,
+          card_header("Estimated Probability of Monogenic Disease"),
+          uiOutput("ppv_box_var")
+        )
+      ),
+
+      card(
+        card_header("Simulated Pedigrees matching Family History"),
+        uiOutput("match_tbl_var")
+      )
     )
-  ),
-
-  card(
-    card_header("Simulated Pedigrees matching Family History"),
-    uiOutput("match_tbl")
   )
 )
 
 server <- function(input, output, session) {
-  selected_row <- reactive({
-    df <- if (input$mode == "ALS only") als_grid else alsftd_grid
 
-    if (input$als1 != "Unknown") {
-      df <- df %>% filter(relatives_1st_als == as.numeric(input$als1))
+  selected_row_main <- reactive({
+    df <- if (input$mode_main == "ALS only") als_grid else alsftd_grid
+
+    if (input$als1_main != "Unknown") {
+      df <- df %>% filter(relatives_1st_als == as.numeric(input$als1_main))
     }
-    if (input$als2 != "Unknown") {
-      df <- df %>% filter(relatives_2nd_als == as.numeric(input$als2))
+    if (input$als2_main != "Unknown") {
+      df <- df %>% filter(relatives_2nd_als == as.numeric(input$als2_main))
     }
-    if (input$als3 != "Unknown") {
-      df <- df %>% filter(relatives_3rd_als == as.numeric(input$als3))
+    if (input$als3_main != "Unknown") {
+      df <- df %>% filter(relatives_3rd_als == as.numeric(input$als3_main))
     }
 
-    if (input$mode == "ALS + FTD") {
-      if (input$ftd1 != "Unknown") {
-        df <- df %>% filter(relatives_1st_ftd_unique == as.numeric(input$ftd1))
+    if (input$mode_main == "ALS + FTD") {
+      if (input$ftd1_main != "Unknown") {
+        df <- df %>% filter(relatives_1st_ftd_unique == as.numeric(input$ftd1_main))
       }
-      if (input$ftd2 != "Unknown") {
-        df <- df %>% filter(relatives_2nd_ftd_unique == as.numeric(input$ftd2))
+      if (input$ftd2_main != "Unknown") {
+        df <- df %>% filter(relatives_2nd_ftd_unique == as.numeric(input$ftd2_main))
       }
-      if (input$ftd3 != "Unknown") {
-        df <- df %>% filter(relatives_3rd_ftd_unique == as.numeric(input$ftd3))
+      if (input$ftd3_main != "Unknown") {
+        df <- df %>% filter(relatives_3rd_ftd_unique == as.numeric(input$ftd3_main))
       }
     }
 
@@ -330,21 +660,21 @@ server <- function(input, output, session) {
 
     agg <- df %>%
       summarise(
-        relatives_1st_als = if (input$als1 == "Unknown") NA_real_ else first(relatives_1st_als),
-        relatives_2nd_als = if (input$als2 == "Unknown") NA_real_ else first(relatives_2nd_als),
-        relatives_3rd_als = if (input$als3 == "Unknown") NA_real_ else first(relatives_3rd_als),
+        relatives_1st_als = if (input$als1_main == "Unknown") NA_real_ else first(relatives_1st_als),
+        relatives_2nd_als = if (input$als2_main == "Unknown") NA_real_ else first(relatives_2nd_als),
+        relatives_3rd_als = if (input$als3_main == "Unknown") NA_real_ else first(relatives_3rd_als),
         relatives_1st_ftd_unique = if ("relatives_1st_ftd_unique" %in% names(df)) {
-          if (input$ftd1 == "Unknown") NA_real_ else first(relatives_1st_ftd_unique)
+          if (input$ftd1_main == "Unknown") NA_real_ else first(relatives_1st_ftd_unique)
         } else {
           NA_real_
         },
         relatives_2nd_ftd_unique = if ("relatives_2nd_ftd_unique" %in% names(df)) {
-          if (input$ftd2 == "Unknown") NA_real_ else first(relatives_2nd_ftd_unique)
+          if (input$ftd2_main == "Unknown") NA_real_ else first(relatives_2nd_ftd_unique)
         } else {
           NA_real_
         },
         relatives_3rd_ftd_unique = if ("relatives_3rd_ftd_unique" %in% names(df)) {
-          if (input$ftd3 == "Unknown") NA_real_ else first(relatives_3rd_ftd_unique)
+          if (input$ftd3_main == "Unknown") NA_real_ else first(relatives_3rd_ftd_unique)
         } else {
           NA_real_
         },
@@ -364,8 +694,85 @@ server <- function(input, output, session) {
       )
   })
 
-  output$ppv_box <- renderUI({
-    row <- selected_row()
+  selected_row_var <- reactive({
+    df <- if (input$mode_var == "ALS only") varying_als_grid else varying_alsftd_grid
+
+    df <- df %>%
+      filter(
+        ALSFTD_common == as.numeric(input$common_var),
+        ALSFTD_rare == as.numeric(input$rare_var),
+        h2als == as.numeric(input$h2_var)
+      )
+
+    if (input$als1_var != "Unknown") {
+      df <- df %>% filter(relatives_1st_als == as.numeric(input$als1_var))
+    }
+    if (input$als2_var != "Unknown") {
+      df <- df %>% filter(relatives_2nd_als == as.numeric(input$als2_var))
+    }
+    if (input$als3_var != "Unknown") {
+      df <- df %>% filter(relatives_3rd_als == as.numeric(input$als3_var))
+    }
+
+    if (input$mode_var == "ALS + FTD") {
+      if (input$ftd1_var != "Unknown") {
+        df <- df %>% filter(relatives_1st_ftd_unique == as.numeric(input$ftd1_var))
+      }
+      if (input$ftd2_var != "Unknown") {
+        df <- df %>% filter(relatives_2nd_ftd_unique == as.numeric(input$ftd2_var))
+      }
+      if (input$ftd3_var != "Unknown") {
+        df <- df %>% filter(relatives_3rd_ftd_unique == as.numeric(input$ftd3_var))
+      }
+    }
+
+    validate(
+      need(nrow(df) > 0, "No matching pedigree pattern found for this family history and parameter combination.")
+    )
+
+    total_selected_param_n <- sum(df$n)
+
+    agg <- df %>%
+      summarise(
+        relatives_1st_als = if (input$als1_var == "Unknown") NA_real_ else first(relatives_1st_als),
+        relatives_2nd_als = if (input$als2_var == "Unknown") NA_real_ else first(relatives_2nd_als),
+        relatives_3rd_als = if (input$als3_var == "Unknown") NA_real_ else first(relatives_3rd_als),
+        relatives_1st_ftd_unique = if ("relatives_1st_ftd_unique" %in% names(df)) {
+          if (input$ftd1_var == "Unknown") NA_real_ else first(relatives_1st_ftd_unique)
+        } else {
+          NA_real_
+        },
+        relatives_2nd_ftd_unique = if ("relatives_2nd_ftd_unique" %in% names(df)) {
+          if (input$ftd2_var == "Unknown") NA_real_ else first(relatives_2nd_ftd_unique)
+        } else {
+          NA_real_
+        },
+        relatives_3rd_ftd_unique = if ("relatives_3rd_ftd_unique" %in% names(df)) {
+          if (input$ftd3_var == "Unknown") NA_real_ else first(relatives_3rd_ftd_unique)
+        } else {
+          NA_real_
+        },
+        n = sum(n),
+        n_mendelian = sum(n_mendelian),
+        n_non_mendelian = sum(n_non_mendelian)
+      )
+
+    ci <- wilson_ci(agg$n_mendelian, agg$n)
+
+    agg %>%
+      mutate(
+        ALSFTD_common = as.numeric(input$common_var),
+        ALSFTD_rare = as.numeric(input$rare_var),
+        h2als = as.numeric(input$h2_var),
+        PPV = unname(ci["estimate"]),
+        PPV_CI_low = unname(ci["ci_lower"]),
+        PPV_CI_high = unname(ci["ci_upper"]),
+        prevalence = paste0(n, " out of ", total_selected_param_n, " patients")
+      )
+  })
+
+  output$ppv_box_main <- renderUI({
+    row <- selected_row_main()
 
     div(
       style = "padding: 5px;",
@@ -386,191 +793,62 @@ server <- function(input, output, session) {
     )
   })
 
-  output$prob_bar <- renderPlotly({
-    row <- selected_row()
-
-    prior_monogenic <- prior_mendelian_n / prior_total_n
-    prior_polygenic <- 1 - prior_monogenic
-    post_monogenic <- row$n_mendelian / row$n
-    post_polygenic <- row$n_non_mendelian / row$n
-
-    plot_df <- data.frame(
-      scenario = factor(c("Prior", "Family history"), levels = c("Family history", "Prior")),
-      monogenic = c(prior_monogenic, post_monogenic),
-      polygenic = c(prior_polygenic, post_polygenic),
-      monogenic_n = c(prior_mendelian_n, row$n_mendelian),
-      polygenic_n = c(prior_total_n - prior_mendelian_n, row$n_non_mendelian),
-      total_n = c(prior_total_n, row$n),
-      monogenic_label = c(
-        format_prob(prior_monogenic),
-        format_prob(post_monogenic)
-      ),
-      polygenic_label = c(
-        format_prob(prior_polygenic),
-        format_prob(post_polygenic)
-      ),
-      ci_low_label = c("—", format_prob(row$PPV_CI_low)),
-      ci_high_label = c("—", format_prob(row$PPV_CI_high))
-    )
-
-    plot_df$monogenic_hover <- ifelse(
-      plot_df$scenario == "Family history",
-      paste0(
-        "<b>", plot_df$scenario, "</b><br>",
-        "Monogenic: ", plot_df$monogenic_label, "<br>",
-        "95% CI: ", plot_df$ci_low_label, " – ", plot_df$ci_high_label, "<br>",
-        "n = ", format_count(plot_df$monogenic_n), " of ", format_count(plot_df$total_n),
-        "<extra></extra>"
-      ),
-      paste0(
-        "<b>", plot_df$scenario, "</b><br>",
-        "Monogenic: ", plot_df$monogenic_label, "<br>",
-        "n = ", format_count(plot_df$monogenic_n), " of ", format_count(plot_df$total_n),
-        "<extra></extra>"
-      )
-    )
-
-    plot_df$polygenic_hover <- ifelse(
-      plot_df$scenario == "Family history",
-      paste0(
-        "<b>", plot_df$scenario, "</b><br>",
-        "Polygenic: ", plot_df$polygenic_label, "<br>",
-        "95% CI: ", plot_df$ci_low_label, " – ", plot_df$ci_high_label, "<br>",
-        "n = ", format_count(plot_df$polygenic_n), " of ", format_count(plot_df$total_n),
-        "<extra></extra>"
-      ),
-      paste0(
-        "<b>", plot_df$scenario, "</b><br>",
-        "Polygenic: ", plot_df$polygenic_label, "<br>",
-        "n = ", format_count(plot_df$polygenic_n), " of ", format_count(plot_df$total_n),
-        "<extra></extra>"
-      )
-    )
-
-    plot_ly(plot_df) %>%
-      add_trace(
-        x = ~monogenic,
-        y = ~scenario,
-        name = "Monogenic",
-        type = "bar",
-        orientation = "h",
-        marker = list(
-          color = "#ed2024",          # monogenic red
-          line = list(color = "white", width = 1)
-        ),
-        text = ~monogenic_label,
-        textposition = "inside",
-        insidetextanchor = "middle",
-        textfont = list(size = 11, color = "white"),
-        hovertemplate = ~monogenic_hover
-      ) %>%
-      add_trace(
-        x = ~polygenic,
-        y = ~scenario,
-        name = "Polygenic",
-        type = "bar",
-        orientation = "h",
-        marker = list(
-          color = "#5cbcd6",          # polygenic blue
-          line = list(color = "white", width = 1)
-        ),
-        text = ~polygenic_label,
-        textposition = "inside",
-        insidetextanchor = "middle",
-        textfont = list(size = 11, color = "white"),
-        hovertemplate = ~polygenic_hover
-      ) %>%
-      layout(
-        barmode = "stack",
-        bargap = 0.25,
-        font = list(size = 13),
-        uniformtext = list(minsize = 9, mode = "show"),
-        hoverlabel = list(
-          font = list(
-            size = 12,
-            color = "white"   # hover text colour
-          )),
-        xaxis = list(
-          title = "",
-          tickformat = ".0%",
-          range = c(0, 1),
-          showgrid = TRUE,
-          gridcolor = "#e9ecef",
-          zeroline = FALSE,
-          fixedrange = TRUE
-        ),
-        yaxis = list(
-          title = "",
-          automargin = TRUE,
-          fixedrange = TRUE
-        ),
-        legend = list(
-          orientation = "h",
-          xanchor = "center",
-          x = 0.5,
-          yanchor = "bottom",
-          y = 1.01,
-          font = list(size = 12),
-          traceorder = "normal"  # keep legend in trace order
-        ),
-        margin = list(l = 8, r = 8, t = 8, b = 8),
-        dragmode = FALSE
-      ) %>%
-      config(
-        displayModeBar = FALSE,
-        staticPlot = FALSE,
-        scrollZoom = FALSE,
-        doubleClick = FALSE,
-        showTips = FALSE
-      )
+  output$prob_bar_main <- renderPlotly({
+    row <- selected_row_main()
+    build_plot(row, prior_mendelian_n, prior_total_n)
   })
 
-  output$match_tbl <- renderUI({
-    row <- selected_row()
+  output$match_tbl_main <- renderUI({
+    row <- selected_row_main()
+    make_match_table(row, input$mode_main)
+  })
 
-    if (input$mode == "ALS only") {
-      tags$table(
-        class = "table table-striped table-bordered table-sm",
-        tags$thead(
-          tags$tr(
-            tags$th("ALS family history"),
-            tags$th("Number of monogenic index patients"),
-            tags$th("Number of polygenic index patients"),
-            tags$th("Prevalence of this specific family history")
-          )
-        ),
-        tags$tbody(
-          tags$tr(
-            tags$td(HTML(format_als_history(row))),
-            tags$td(format_count(row$n_mendelian)),
-            tags$td(format_count(row$n_non_mendelian)),
-            tags$td(format_prevalence(row$prevalence))
-          )
-        )
+  output$param_summary_var <- renderUI({
+    div(
+      style = "padding: 5px;",
+      p(
+        HTML(paste0(
+          "<strong>ALS/FTD common variant penetrance:</strong> ",
+          format_param(as.numeric(input$common_var)), "<br>",
+          "<strong>ALS/FTD rare variant penetrance:</strong> ",
+          format_param(as.numeric(input$rare_var)), "<br>",
+          "<strong>ALS heritability:</strong> ",
+          format_param(as.numeric(input$h2_var))
+        ))
       )
-    } else {
-      tags$table(
-        class = "table table-striped table-bordered table-sm",
-        tags$thead(
-          tags$tr(
-            tags$th("ALS family history"),
-            tags$th("FTD family history"),
-            tags$th("Number of monogenic index patients"),
-            tags$th("Number of polygenic index patients"),
-            tags$th("Family history prevalence")
-          )
-        ),
-        tags$tbody(
-          tags$tr(
-            tags$td(HTML(format_als_history(row))),
-            tags$td(HTML(format_ftd_history(row))),
-            tags$td(format_count(row$n_mendelian)),
-            tags$td(format_count(row$n_non_mendelian)),
-            tags$td(format_prevalence(row$prevalence))
-          )
-        )
+    )
+  })
+
+  output$ppv_box_var <- renderUI({
+    row <- selected_row_var()
+
+    div(
+      style = "padding: 5px;",
+      p(
+        HTML(paste0(
+          "Probability of monogenic disease: <strong>",
+          format_prob(row$PPV),
+          "</strong> (95% CI <strong>",
+          format_prob(row$PPV_CI_low),
+          "</strong> – <strong>",
+          format_prob(row$PPV_CI_high),
+          "</strong>);<br><br>",
+          "Based on ",
+          format_count(row$n),
+          " matching simulated pedigrees."
+        ))
       )
-    }
+    )
+  })
+
+  output$prob_bar_var <- renderPlotly({
+    row <- selected_row_var()
+    build_plot(row, prior_mendelian_n, prior_total_n)
+  })
+
+  output$match_tbl_var <- renderUI({
+    row <- selected_row_var()
+    make_match_table(row, input$mode_var)
   })
 }
 
