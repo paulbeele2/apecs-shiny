@@ -156,18 +156,18 @@ build_plot_var_compare <- function(row_main_ref, row_var, prior_mendelian_n, pri
 
   plot_df <- data.frame(
     scenario = factor(
-      c("Family history<br>(selected)", "Family history<br>(main)", "Prior probability"),
-      levels = c("Family history<br>(main)", "Family history<br>(selected)", "Prior probability")
+      c("Family history<br>(selected)", "Prior probability", "Family history<br>(main)"),
+      levels = c("Family history<br>(main)", "Prior probability", "Family history<br>(selected)")
     ),
-    monogenic = c(prior_monogenic, main_monogenic, var_monogenic),
-    polygenic = c(prior_polygenic, main_polygenic, var_polygenic),
-    monogenic_n = c(prior_mendelian_n, row_main_ref$n_mendelian, row_var$n_mendelian),
-    polygenic_n = c(prior_total_n - prior_mendelian_n, row_main_ref$n_non_mendelian, row_var$n_non_mendelian),
-    total_n = c(prior_total_n, row_main_ref$n, row_var$n),
-    monogenic_label = c(format_prob(prior_monogenic), format_prob(main_monogenic), format_prob(var_monogenic)),
-    polygenic_label = c(format_prob(prior_polygenic), format_prob(main_polygenic), format_prob(var_polygenic)),
-    ci_low_label = c("\u2014", format_prob(row_main_ref$PPV_CI_low), format_prob(row_var$PPV_CI_low)),
-    ci_high_label = c("\u2014", format_prob(row_main_ref$PPV_CI_high), format_prob(row_var$PPV_CI_high))
+    monogenic = c(var_monogenic, prior_monogenic, main_monogenic),
+    polygenic = c(var_polygenic, prior_polygenic, main_polygenic),
+    monogenic_n = c(row_var$n_mendelian, prior_mendelian_n, row_main_ref$n_mendelian),
+    polygenic_n = c(row_var$n_non_mendelian, prior_total_n - prior_mendelian_n, row_main_ref$n_non_mendelian),
+    total_n = c(row_var$n, prior_total_n, row_main_ref$n),
+    monogenic_label = c(format_prob(var_monogenic), format_prob(prior_monogenic), format_prob(main_monogenic)),
+    polygenic_label = c(format_prob(var_polygenic), format_prob(prior_polygenic), format_prob(main_polygenic)),
+    ci_low_label = c(format_prob(row_var$PPV_CI_low), "\u2014", format_prob(row_main_ref$PPV_CI_low)),
+    ci_high_label = c(format_prob(row_var$PPV_CI_high), "\u2014", format_prob(row_main_ref$PPV_CI_high))
   )
 
   plot_df$monogenic_hover <- ifelse(
