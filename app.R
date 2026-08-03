@@ -269,12 +269,19 @@ ui <- page_fluid(
       .shiny-html-output p:last-child, .card-body p:last-child { margin-bottom: 0; }
       .nav-tabs .nav-link { font-size: 14px; font-weight: 600; }
       .irs-grid-text { font-size: 11px !important; }
+
       @media (max-width: 767px) {
         .app-header { align-items: flex-start; }
         .app-header-logo { height: 64px; }
         .app-title { font-size: 20px; }
         .app-subtitle { font-size: 15px; }
         .app-fullname { font-size: 13px; }
+      }
+
+      @media (orientation: portrait) and (max-width: 900px) {
+        .app-header-logo {
+          display: none !important;
+        }
       }
     "))
   ),
