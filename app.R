@@ -302,35 +302,41 @@ make_match_table <- function(row, mode) {
   }
 }
 
-ui <- page_navbar(
-  title = div(
-    style = "display: flex; align-items: center; justify-content: flex-start; width: 100%; gap: 10px;",
-    tags$img(
-      src = "APECS_logo.png",
-      height = "100px",
-      class = "d-none d-md-block",
-      style = "object-fit: contain;"
-    ),
-    div(
-      div(
-        class = "app-title",
-        HTML(
-          "ALS Family History - Monogenic Probability Calculator<br>
-          <span class='app-subtitle'>Based on Mendelian and complex inheritance theory</span>"
-        )
-      ),
-      div(
-        class = "app-fullname",
-        tags$em("APECS - ALS PEdigree simulations under a Complex and Simple disease model")
-      )
-    )
-  ),
+ui <- page_fluid(
   theme = bs_theme(version = 5),
 
   tags$head(
     tags$style(HTML("
+      .app-shell {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding-top: 10px;
+        padding-bottom: 20px;
+      }
+
+      .app-header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+        padding: 8px 4px 2px 4px;
+      }
+
+      .app-header-logo {
+        height: 82px;
+        width: auto;
+        object-fit: contain;
+        flex-shrink: 0;
+      }
+
+      .app-header-text {
+        min-width: 280px;
+      }
+
       .app-title {
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 600;
         line-height: 1.2;
       }
@@ -385,243 +391,300 @@ ui <- page_navbar(
       .card-body p:last-child {
         margin-bottom: 0;
       }
+
+      .nav-tabs .nav-link {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      @media (max-width: 767px) {
+        .app-header {
+          align-items: flex-start;
+        }
+
+        .app-header-logo {
+          height: 64px;
+        }
+
+        .app-title {
+          font-size: 20px;
+        }
+
+        .app-subtitle {
+          font-size: 15px;
+        }
+
+        .app-fullname {
+          font-size: 13px;
+        }
+      }
     "))
   ),
 
-  nav_panel(
-    "Main parameter",
-    layout_sidebar(
-      sidebar = sidebar(
-        width = 260,
-        position = "left",
-        open = list(
-          desktop = "open",
-          mobile = "closed"
-        ),
+  div(
+    class = "app-shell",
 
-        selectInput("mode_main", "Model", choices = c("ALS only", "ALS + FTD")),
-
-        selectInput(
-          "als1_main",
-          "1st-degree relatives with ALS",
-          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-          selected = "0"
-        ),
-        selectInput(
-          "als2_main",
-          "2nd-degree relatives with ALS",
-          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-          selected = "0"
-        ),
-        selectInput(
-          "als3_main",
-          "3rd-degree relatives with ALS",
-          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-          selected = "0"
-        ),
-
-        conditionalPanel(
-          condition = "input.mode_main == 'ALS + FTD'",
-          selectInput(
-            "ftd1_main",
-            "1st-degree relatives with FTD",
-            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-            selected = "0"
-          ),
-          selectInput(
-            "ftd2_main",
-            "2nd-degree relatives with FTD",
-            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-            selected = "0"
-          ),
-          selectInput(
-            "ftd3_main",
-            "3rd-degree relatives with FTD",
-            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-            selected = "0"
-          )
-        )
+    div(
+      class = "app-header",
+      tags$img(
+        src = "APECS_logo.png",
+        class = "app-header-logo"
       ),
-
-      layout_columns(
-        col_widths = c(8, 4),
-
-        card(
-          full_screen = FALSE,
-          card_header("How to count relatives"),
-          div(
-            style = "padding: 4px; height: 100%; overflow: hidden;",
-            tags$img(
-              src = "APECS_relative_count.svg",
-              style = "width: 100%; height: 100%; object-fit: contain; display: block;"
-            )
+      div(
+        class = "app-header-text",
+        div(
+          class = "app-title",
+          HTML(
+            "ALS Family History - Monogenic Probability Calculator<br>
+            <span class='app-subtitle'>Based on Mendelian and complex inheritance theory</span>"
           )
         ),
-
-        card(
-          full_screen = FALSE,
-          card_header("Counting affected relatives"),
-          div(
-            style = "padding: 5px;",
-            p(
-              "Index patient (individual A) is marked by the black arrow. ",
-              "The degree of relatives to individual A is illustrated by the number in each individual."
-            ),
-            p(
-              "Comorbid ALS-FTD (individual B) is only counted as ALS once."
-            ),
-            p(
-              "Note that for ‘any dementia’-affected relative, both FTD- (individual D) ",
-              "and other dementia-affected (individual C) relatives are considered."
-            ),
-            p(
-              "APECS was benchmarked in 3-generation pedigrees, limiting ",
-              "predictions involving more distant affected relatives."
-            )
-          )
+        div(
+          class = "app-fullname",
+          tags$em("APECS - ALS PEdigree simulations under a Complex and Simple disease model")
         )
-      ),
-
-      layout_columns(
-        col_widths = c(8, 4),
-
-        card(
-          full_screen = FALSE,
-          card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
-          plotlyOutput("prob_bar_main", height = "400px")
-        ),
-
-        card(
-          full_screen = FALSE,
-          card_header("Estimated Probability of Monogenic Disease"),
-          uiOutput("ppv_box_main")
-        )
-      ),
-
-      card(
-        card_header("Simulated Pedigrees matching Family History"),
-        uiOutput("match_tbl_main")
       )
-    )
-  ),
+    ),
 
-  nav_panel(
-    "Variable parameters",
-    layout_sidebar(
-      sidebar = sidebar(
-        width = 300,
-        position = "left",
-        open = list(
-          desktop = "open",
-          mobile = "closed"
-        ),
+    navset_card_tab(
+      id = "analysis_tab",
 
-        selectInput("mode_var", "Model", choices = c("ALS only", "ALS + FTD")),
+      nav_panel(
+        "Main parameter",
+        layout_sidebar(
+          sidebar = sidebar(
+            width = 260,
+            position = "left",
+            open = list(
+              desktop = "open",
+              mobile = "closed"
+            ),
 
-        selectInput(
-          "als1_var",
-          "1st-degree relatives with ALS",
-          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-          selected = "0"
-        ),
-        selectInput(
-          "als2_var",
-          "2nd-degree relatives with ALS",
-          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-          selected = "0"
-        ),
-        selectInput(
-          "als3_var",
-          "3rd-degree relatives with ALS",
-          choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-          selected = "0"
-        ),
+            selectInput("mode_main", "Model", choices = c("ALS only", "ALS + FTD")),
 
-        conditionalPanel(
-          condition = "input.mode_var == 'ALS + FTD'",
-          selectInput(
-            "ftd1_var",
-            "1st-degree relatives with FTD",
-            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-            selected = "0"
-          ),
-          selectInput(
-            "ftd2_var",
-            "2nd-degree relatives with FTD",
-            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-            selected = "0"
-          ),
-          selectInput(
-            "ftd3_var",
-            "3rd-degree relatives with FTD",
-            choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
-            selected = "0"
-          )
-        ),
+            selectInput(
+              "als1_main",
+              "1st-degree relatives with ALS",
+              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+              selected = "0"
+            ),
+            selectInput(
+              "als2_main",
+              "2nd-degree relatives with ALS",
+              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+              selected = "0"
+            ),
+            selectInput(
+              "als3_main",
+              "3rd-degree relatives with ALS",
+              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+              selected = "0"
+            ),
 
-        tags$hr(),
-
-        selectInput(
-          "common_var",
-          "ALS/FTD common variant penetrance",
-          choices = setNames(common_vals, format_param(common_vals)),
-          selected = common_vals[1]
-        ),
-        selectInput(
-          "rare_var",
-          "ALS/FTD rare variant penetrance",
-          choices = setNames(rare_vals, format_param(rare_vals)),
-          selected = rare_vals[1]
-        ),
-        selectInput(
-          "h2_var",
-          "ALS heritability",
-          choices = setNames(h2_vals, format_param(h2_vals)),
-          selected = h2_vals[1]
-        )
-      ),
-
-      layout_columns(
-        col_widths = c(8, 4),
-
-        card(
-          full_screen = FALSE,
-          card_header("How to count relatives"),
-          div(
-            style = "padding: 4px; height: 100%; overflow: hidden;",
-            tags$img(
-              src = "APECS_relative_count.svg",
-              style = "width: 100%; height: 100%; object-fit: contain; display: block;"
+            conditionalPanel(
+              condition = "input.mode_main == 'ALS + FTD'",
+              selectInput(
+                "ftd1_main",
+                "1st-degree relatives with FTD",
+                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+                selected = "0"
+              ),
+              selectInput(
+                "ftd2_main",
+                "2nd-degree relatives with FTD",
+                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+                selected = "0"
+              ),
+              selectInput(
+                "ftd3_main",
+                "3rd-degree relatives with FTD",
+                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+                selected = "0"
+              )
             )
+          ),
+
+          layout_columns(
+            col_widths = c(8, 4),
+
+            card(
+              full_screen = FALSE,
+              card_header("How to count relatives"),
+              div(
+                style = "padding: 4px; height: 100%; overflow: hidden;",
+                tags$img(
+                  src = "APECS_relative_count.svg",
+                  style = "width: 100%; height: 100%; object-fit: contain; display: block;"
+                )
+              )
+            ),
+
+            card(
+              full_screen = FALSE,
+              card_header("Counting affected relatives"),
+              div(
+                style = "padding: 5px;",
+                p(
+                  "Index patient (individual A) is marked by the black arrow. ",
+                  "The degree of relatives to individual A is illustrated by the number in each individual."
+                ),
+                p(
+                  "Comorbid ALS-FTD (individual B) is only counted as ALS once."
+                ),
+                p(
+                  "Note that for ‘any dementia’-affected relative, both FTD- (individual D) ",
+                  "and other dementia-affected (individual C) relatives are considered."
+                ),
+                p(
+                  "APECS was benchmarked in 3-generation pedigrees, limiting ",
+                  "predictions involving more distant affected relatives."
+                )
+              )
+            )
+          ),
+
+          layout_columns(
+            col_widths = c(8, 4),
+
+            card(
+              full_screen = FALSE,
+              card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
+              plotlyOutput("prob_bar_main", height = "400px")
+            ),
+
+            card(
+              full_screen = FALSE,
+              card_header("Estimated Probability of Monogenic Disease"),
+              uiOutput("ppv_box_main")
+            )
+          ),
+
+          card(
+            card_header("Simulated Pedigrees matching Family History"),
+            uiOutput("match_tbl_main")
           )
-        ),
-
-        card(
-          full_screen = FALSE,
-          card_header("Selected simulation parameters"),
-          uiOutput("param_summary_var")
         )
       ),
 
-      layout_columns(
-        col_widths = c(8, 4),
+      nav_panel(
+        "Variable parameters",
+        layout_sidebar(
+          sidebar = sidebar(
+            width = 300,
+            position = "left",
+            open = list(
+              desktop = "open",
+              mobile = "closed"
+            ),
 
-        card(
-          full_screen = FALSE,
-          card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
-          plotlyOutput("prob_bar_var", height = "400px")
-        ),
+            selectInput("mode_var", "Model", choices = c("ALS only", "ALS + FTD")),
 
-        card(
-          full_screen = FALSE,
-          card_header("Estimated Probability of Monogenic Disease"),
-          uiOutput("ppv_box_var")
+            selectInput(
+              "als1_var",
+              "1st-degree relatives with ALS",
+              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+              selected = "0"
+            ),
+            selectInput(
+              "als2_var",
+              "2nd-degree relatives with ALS",
+              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+              selected = "0"
+            ),
+            selectInput(
+              "als3_var",
+              "3rd-degree relatives with ALS",
+              choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+              selected = "0"
+            ),
+
+            conditionalPanel(
+              condition = "input.mode_var == 'ALS + FTD'",
+              selectInput(
+                "ftd1_var",
+                "1st-degree relatives with FTD",
+                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+                selected = "0"
+              ),
+              selectInput(
+                "ftd2_var",
+                "2nd-degree relatives with FTD",
+                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+                selected = "0"
+              ),
+              selectInput(
+                "ftd3_var",
+                "3rd-degree relatives with FTD",
+                choices = c("0", "1", "2", "3", "4", "5", "Unknown"),
+                selected = "0"
+              )
+            ),
+
+            tags$hr(),
+
+            selectInput(
+              "common_var",
+              "ALS/FTD common variant penetrance",
+              choices = setNames(common_vals, format_param(common_vals)),
+              selected = common_vals[1]
+            ),
+            selectInput(
+              "rare_var",
+              "ALS/FTD rare variant penetrance",
+              choices = setNames(rare_vals, format_param(rare_vals)),
+              selected = rare_vals[1]
+            ),
+            selectInput(
+              "h2_var",
+              "ALS heritability",
+              choices = setNames(h2_vals, format_param(h2_vals)),
+              selected = h2_vals[1]
+            )
+          ),
+
+          layout_columns(
+            col_widths = c(8, 4),
+
+            card(
+              full_screen = FALSE,
+              card_header("How to count relatives"),
+              div(
+                style = "padding: 4px; height: 100%; overflow: hidden;",
+                tags$img(
+                  src = "APECS_relative_count.svg",
+                  style = "width: 100%; height: 100%; object-fit: contain; display: block;"
+                )
+              )
+            ),
+
+            card(
+              full_screen = FALSE,
+              card_header("Selected simulation parameters"),
+              uiOutput("param_summary_var")
+            )
+          ),
+
+          layout_columns(
+            col_widths = c(8, 4),
+
+            card(
+              full_screen = FALSE,
+              card_header("Prior Probability vs. Family History Probability for Monogenic Disease"),
+              plotlyOutput("prob_bar_var", height = "400px")
+            ),
+
+            card(
+              full_screen = FALSE,
+              card_header("Estimated Probability of Monogenic Disease"),
+              uiOutput("ppv_box_var")
+            )
+          ),
+
+          card(
+            card_header("Simulated Pedigrees matching Family History"),
+            uiOutput("match_tbl_var")
+          )
         )
-      ),
-
-      card(
-        card_header("Simulated Pedigrees matching Family History"),
-        uiOutput("match_tbl_var")
       )
     )
   )
