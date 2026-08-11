@@ -353,9 +353,9 @@ ui <- page_fluid(
               selectInput("ftd3_var", "3rd-degree relatives with FTD", choices = c("0","1","2","3","4","5","Unknown"), selected = "0")
             ),
             tags$hr(),
-            sliderTextInput(inputId = "common_var", label = "ALS/FTD moderate allele penetrance",
+            sliderTextInput(inputId = "common_var", label = "ALS moderate allele penetrance",
               choices = format_param(common_vals), selected = format_param(0.20), grid = TRUE, force_edges = TRUE),
-            sliderTextInput(inputId = "rare_var", label = "ALS/FTD high allele penetrance",
+            sliderTextInput(inputId = "rare_var", label = "ALS high allele penetrance",
               choices = format_param(rare_vals), selected = format_param(0.50), grid = TRUE, force_edges = TRUE),
             sliderTextInput(inputId = "h2_var", label = "ALS heritability",
               choices = format_param(h2_vals), selected = format_param(0.40), grid = TRUE, force_edges = TRUE)
@@ -587,8 +587,8 @@ server <- function(input, output, session) {
         "Probability of monogenic disease: <strong>", format_prob(row$PPV), "</strong> (95% CI <strong>",
         format_prob(row$PPV_CI_low), "</strong> \u2013 <strong>", format_prob(row$PPV_CI_high), "</strong>);<br><br>",
         "Based on ", format_count(row$n), " matching simulated pedigrees.<br><br>",
-        "<strong>ALS/FTD moderate allele penetrance:</strong> 21.0% (C9orf72-like)<br>",
-        "<strong>ALS/FTD high allele penetrance:</strong> 50.0% (FUS/SOD1-like)<br>",
+        "<strong>ALS moderate allele penetrance:</strong> 21.0% (C9orf72-like)<br>",
+        "<strong>ALS high allele penetrance:</strong> 50.0% (FUS/SOD1-like)<br>",
         "<strong>ALS heritability:</strong> 40.0%"
       )))
     )
@@ -613,8 +613,8 @@ server <- function(input, output, session) {
         "Probability of monogenic disease: <strong>", format_prob(row$PPV), "</strong> (95% CI <strong>",
         format_prob(row$PPV_CI_low), "</strong> \u2013 <strong>", format_prob(row$PPV_CI_high), "</strong>);<br><br>",
         "Based on ", format_count(row$n), " matching simulated pedigrees.<br><br>",
-        "<strong>ALS/FTD moderate allele penetrance:</strong> ", format_prob(as.numeric(input$common_var)), "<br>",
-        "<strong>ALS/FTD high allele penetrance:</strong> ", format_prob(as.numeric(input$rare_var)), "<br>",
+        "<strong>ALS moderate allele penetrance:</strong> ", format_prob(as.numeric(input$common_var)), "<br>",
+        "<strong>ALS high allele penetrance:</strong> ", format_prob(as.numeric(input$rare_var)), "<br>",
         "<strong>ALS heritability:</strong> ", format_prob(as.numeric(input$h2_var))
       )))
     )
