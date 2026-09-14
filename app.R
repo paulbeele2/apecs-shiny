@@ -64,11 +64,11 @@ format_ftd_history <- function(row) {
 
 counting_relatives_text <- div(
   style = "padding: 5px;",
-  p("Index patient (individual A) is marked by the black arrow. ",
-    "The degree of relatives to individual A is illustrated by the number in each individual."),
-  p("Comorbid ALS-FTD (individual B) is only counted as ALS once."),
-  p("Note that for \u2018any dementia\u2019-affected relative, both FTD- (individual D) ",
-    "and other dementia-affected (individual C) relatives are considered."),
+  p("Index patient (individual I) is marked by the black arrow. ",
+    "The degree of relatives to individual I is illustrated by the number in each individual."),
+  p("Comorbid ALS-FTD (individual II) is only counted as ALS once."),
+  p("Note that for \u2018any dementia\u2019-affected relative, both FTD- (individual IV) ",
+    "and other dementia-affected (individual III) relatives are considered."),
   p("APECS was benchmarked in 3-generation pedigrees, limiting ",
     "predictions involving more distant affected relatives.")
 )
